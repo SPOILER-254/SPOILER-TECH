@@ -1,5 +1,5 @@
 {
-  "name": "𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ",
+  "name": "spoiler-tech ",
   "version": "2.0.0",
   "description": "WhatsApp Bot",
   "main": "index.js",
@@ -18,7 +18,7 @@
   "keywords": [
     "whatsapp-bot"
   ],
-  "author": "Deebrooz",
+  "author": "spoiler",
   "license": "ISC",
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
