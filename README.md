@@ -7,7 +7,7 @@
 <br>
 
 ![GitHub stars](https://img.shields.io/github/stars/spoiler-254/spoiler-tech?style=for-the-badge&color=darkgreen)
-![GitHub forks](https://img.shields.io/github/forks/spoiler254/spoiler-tech?style=for-the-badge&color=darkgreen)
+![GitHub forks](https://img.shields.io/github/forks/spoiler-254/spoiler-tech?style=for-the-badge&color=darkgreen)
 ![GitHub repo size](https://img.shields.io/github/repo-size/spoiler-254/spoiler-tech?style=for-the-badge&color=darkgreen)
 
 </div>
