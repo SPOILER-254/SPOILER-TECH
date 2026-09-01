@@ -8,8 +8,9 @@ const settings = {
   packname: '𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ',
   author: '𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ',
   botName: "𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ",
-  botOwner: '𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ', // Your name 
-  ownerNumber: process.env.OWNER_NUMBER || '254143914610 ,255675421210', //Set your number here without + symbol, just add country code & number without any space
+  botOwner: '𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ', // Your name supreme
+  ownerNumber: process.env.OWNER_NUMBER || ',255675421210', //Set your number here without + symbol, just add country code & number without any space
+  ownernumber:process.env.owner_number|| '254143914610', //set your number here without +symbol. just add country code & number without any spaces
   giphyApiKey: 'qnl7ssQChTdPjsKta2Ax2LMaGXz303tq',
   commandMode: "public",
   maxStoreMessages: 20, 
