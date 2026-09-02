@@ -19,7 +19,7 @@ const settings = {
   version: "2.0.0",
   updateBranch: 'main',
   updateZipToken: '',
-  updateZipUrl: "https://github.com/SPOILER-254/SPOILER-TECH/tree/main",
+  updateZipUrl: "https://github.com/adevos-x-tech/adevosxbot",
   timezone: 'Africa/nairobi',
 };
 
