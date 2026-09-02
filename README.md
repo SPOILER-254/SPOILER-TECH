@@ -30,3 +30,4 @@ Spoiler Tech - WhatsApp bot framework | Leaks | Tools
 ![GitHub repo size](https://img.shields.io/github/repo-size/spoiler-254/spoiler-tech?style=for-the-badge&color=darkgreen)
 
 </div>
+Powered by 𝕾𝖚𝖕𝖗𝖊𝖒𝖊
