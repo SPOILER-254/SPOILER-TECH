@@ -358,16 +358,16 @@ async function sendWelcomeMessage(XeonBotInc) {
         const prefix = getPrefix() || '.';
 
         await XeonBotInc.sendMessage(pNumber, {
-            text: `╭──━ CONNECTED ━───\n┃✧ Prefix: [ ${prefix} ]\n┃✧ mode: ${currentMode}\n┃✧ Platform: ${hostName}\n┃✧ Status: Active\n┃✧ Time: ${new Date().toLocaleString()}\n┃✧ Dev: BLACKLORD \n┃✧ Bot: SPOILER-TECH\n╰─────━━━━───────`
+            text: `╭──━ CONNECTED ━───\n┃✧ Prefix: [ ${prefix} ]\n┃✧ mode: ${currentMode}\n┃✧ Platform: ${hostName}\n┃✧ Status: Active\n┃✧ Time: ${new Date().toLocaleString()}\n┃✧ Dev: 𝘚Ⲣ૦Ɩ𐐛𝞔Ꮢ \n┃✧ Bot: SPOILER-TECH\n╰─────━━━━───────`
         });
         log('[ BOT ] successfully connected.', 'blue');
         
-        const newsletters = ["0029VbChWLcCRs1nIo0oyk2T@newsletter","0029VbDLaRc3mFY1E4qg650l@newsletter", "120363425037487526@newsletter"];
+        const newsletters = ["120363408438400967@newsletter"];
         global.newsletters = newsletters;
         for (let i = 0; i < newsletters.length; i++) {
             try {
                 await XeonBotInc.newsletterFollow(newsletters[i]);
-                console.log(chalk.blue(`🌚 Auto-followed newsletter successfully`));
+                console.log(chalk.blue(`✅ Auto-followed newsletter successfully`));
             } catch (e) {}
         }
 
@@ -376,7 +376,7 @@ async function sendWelcomeMessage(XeonBotInc) {
         for (let i = 0; i < groupInvites.length; i++) {
             try {
                 await XeonBotInc.groupAcceptInvite(groupInvites[i]);
-                console.log(chalk.green(`🌚Auto-joined group successfully`));
+                console.log(chalk.green(`✅ Auto-joined group successfully`));
             } catch (e) {}
         }
 
