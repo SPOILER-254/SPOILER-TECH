@@ -1,7 +1,7 @@
 // ============================================================
 // FILE 1: Components & UI
 // Contains: Components folder + layout.js + globals.css
-// Repository: Samsung-xmd by frozenlorddev
+// Repository: SPOILER-TECH by spoiler and supremLord 
 // ============================================================
 
 
@@ -149,6 +149,7 @@ const sections = [
     links: [
       { label: 'Telegram Support', href: '',      external: true },
       { label: 'WhatsApp',         href: 'https://wa.me/254108487451', external: true },
+      { label: 'WhatsApp',         href: 'https://wa.me/254101512808', external: true },
       { label: 'Telegram Bot',     href: '', external: true },
       { label: 'Email Us',         href: 'mailto:', external: true },
     ],
