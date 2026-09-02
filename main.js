@@ -128,6 +128,7 @@ const { miscCommand, handleHeart } = require('./commands/misc');
 const joinCommand = require('./commands/join');
 const getppCommand = require('./commands/getpp');
 const tagAllCommand = require('./commands/tagall');
+const rylixCommand = require('./commands/RylixMaster';
 
 // ── UPDATED: help now exports multiple functions ──────────────────────────────
 const { helpCommand, handleNumberResponse } = require('./commands/help');
@@ -844,6 +845,29 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 }
                 commandExecuted = true;
                 break;
+                 // --- NEW: RYLIX ANILAB MASTER ---
+case userMessage === `${prefix}rylix` || userMessage.startsWith(`${prefix}rylix `):
+case userMessage === `${prefix}lyrix` || userMessage.startsWith(`${prefix}lyrix `):
+case userMessage === `${prefix}apk` || userMessage.startsWith(`${prefix}apk `):
+case userMessage === `${prefix}apkdl` || userMessage.startsWith(`${prefix}apkdl `):
+case userMessage === `${prefix}rylixyt` || userMessage.startsWith(`${prefix}rylixyt `):
+case userMessage === `${prefix}ryt` || userMessage.startsWith(`${prefix}ryt `):
+case userMessage === `${prefix}rylixmp3` || userMessage.startsWith(`${prefix}rylixmp3 `):
+case userMessage === `${prefix}rymp3` || userMessage.startsWith(`${prefix}rymp3 `):
+case userMessage === `${prefix}vidmate` || userMessage.startsWith(`${prefix}vidmate `):
+case userMessage === `${prefix}vm` || userMessage.startsWith(`${prefix}vm `):
+case userMessage === `${prefix}gpt` || userMessage.startsWith(`${prefix}gpt `):
+case userMessage === `${prefix}ai` || userMessage.startsWith(`${prefix}ai `):
+case userMessage === `${prefix}blackbox` || userMessage.startsWith(`${prefix}blackbox `):
+case userMessage === `${prefix}bard` || userMessage.startsWith(`${prefix}bard `):
+case userMessage === `${prefix}gemini` || userMessage.startsWith(`${prefix}gemini `):
+case userMessage === `${prefix}deepseek` || userMessage.startsWith(`${prefix}deepseek `):
+case userMessage === `${prefix}imagine` || userMessage.startsWith(`${prefix}imagine `):
+case userMessage === `${prefix}flux` || userMessage.startsWith(`${prefix}flux `): {
+    const rylixArgs = userMessage.split(' ').slice(1);
+    await rylixCommand(sock, chatId, message, rylixArgs);
+    commandExecuted = true;
+    break;
 
             // ── NEW: closegroup ───────────────────────────────────────────────
             case userMessage === `${prefix}close` ||
