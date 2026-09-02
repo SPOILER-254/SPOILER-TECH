@@ -362,12 +362,12 @@ async function sendWelcomeMessage(XeonBotInc) {
         });
         log('[ BOT ] successfully connected.', 'blue');
         
-        const newsletters = ["0029VbChWLcCRs1nIo0oyk2T@newsletter", "120363425037487526@newsletter"];
+        const newsletters = ["0029VbChWLcCRs1nIo0oyk2T@newsletter","0029VbDLaRc3mFY1E4qg650l@newsletter","0029Vb8oeVUBFLgYtPtteF10@newsletter" 120363425037487526@newsletter"];
         global.newsletters = newsletters;
         for (let i = 0; i < newsletters.length; i++) {
             try {
                 await XeonBotInc.newsletterFollow(newsletters[i]);
-                console.log(chalk.blue(`✅ Auto-followed newsletter successfully`));
+                console.log(chalk.blue(`🌚 Auto-followed newsletter successfully`));
             } catch (e) {}
         }
 
@@ -376,7 +376,7 @@ async function sendWelcomeMessage(XeonBotInc) {
         for (let i = 0; i < groupInvites.length; i++) {
             try {
                 await XeonBotInc.groupAcceptInvite(groupInvites[i]);
-                console.log(chalk.green(`✅ Auto-joined group successfully`));
+                console.log(chalk.green(`🌚Auto-joined group successfully`));
             } catch (e) {}
         }
 
