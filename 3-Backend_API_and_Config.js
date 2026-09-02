@@ -9,7 +9,7 @@
 // FILE: package.json
 // ============================================================
 {
-  "name": "mzazi-tech",
+  "name": "spoiler-tech",
   "version": "1.0.0",
   "private": true,
   "scripts": {
