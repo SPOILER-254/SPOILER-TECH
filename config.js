@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 global.APIs = {
-  // --- CORE OLD ---
+  // CORE
   xteam: 'https://api.xteam.xyz',
   dzx: 'https://api.dhamzxploit.my.id',
   lol: 'https://api.lolhuman.xyz',
@@ -13,38 +13,48 @@ global.APIs = {
   nrtm: 'https://fg-nrtm.ddns.net',
   bg: 'http://bochil.ddns.net',
   fgmods: 'https://api-fgmods.ddns.net',
-  
-  // --- DOWNLOADER ---
+
+  // SOCIAL DOWNLOADER
   tiktok: 'https://api.lolhuman.xyz',
   instagram: 'https://api.lolhuman.xyz',
   facebook: 'https://api.lolhuman.xyz',
   youtube: 'https://api.lolhuman.xyz',
   yta: 'https://api.lolhuman.xyz',
   ytv: 'https://api.lolhuman.xyz',
+  yt: 'https://api.lolhuman.xyz',
   vidmate: 'https://api.vidmate-official.my.id',
-  
-  // --- ANIME ---
+
+  // ANIME
   anilab: 'https://api.jikan.moe',
   anilist: 'https://graphql.anilist.co',
   crunchyroll: 'https://api.lolhuman.xyz',
 
-  // --- BROWSER / SEARCH ---
+  // BROWSER / SEARCH
   google: 'https://api.lolhuman.xyz',
   chrome: 'https://api.duckduckgo.com',
   opera: 'https://api.duckduckgo.com',
+  operamini: 'https://api.duckduckgo.com',
   bing: 'https://api.bing.microsoft.com',
 
-  // --- AI ALL ---
+  // AI - ALL
   openai: 'https://api.openai.com/v1',
   chatgpt: 'https://api.openai.com/v1',
+  gpt: 'https://api.openai.com/v1',
   gpt4: 'https://api.neoxr.my.id',
   metaai: 'https://www.blackbox.ai',
+  meta: 'https://www.blackbox.ai',
   gemini: 'https://generativelanguage.googleapis.com',
   deepseek: 'https://api.deepseek.com',
   deepseek_ai: 'https://api.deepseek.com',
   claude: 'https://api.anthropic.com',
   blackbox: 'https://www.blackbox.ai',
-  questionai: 'https://api.akuari.my.id'
+  questionai: 'https://api.akuari.my.id',
+  
+  // RYLIX + EXTRA APPS
+  rylix: 'https://api.rylixapi.my.id',
+  rylix2: 'https://rylix-api.vercel.app',
+  apk: 'https://api.rylixapi.my.id',
+  appstore: 'https://api.rylixapi.my.id'
 };
 
 global.APIKeys = {
@@ -62,7 +72,9 @@ global.APIKeys = {
   'https://api.openai.com/v1': process.env.OPENAI_KEY || 'sk-xxx',
   'https://generativelanguage.googleapis.com': process.env.GEMINI_KEY || 'free',
   'https://www.blackbox.ai': 'free',
-  'https://api.akuari.my.id': 'free'
+  'https://api.akuari.my.id': 'free',
+  'https://api.rylixapi.my.id': 'free',
+  'https://rylix-api.vercel.app': 'free'
 };
 
 module.exports = {
