@@ -1,7 +1,7 @@
 
 /**
-* adevos
-* adevos
+* spoiler
+* spoiler
 */
 
 const settings = {
