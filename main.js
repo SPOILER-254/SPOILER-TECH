@@ -325,10 +325,10 @@ const pendingCommand = require('./commands/pending');
 /*━━━━━━━━━━━━━━━━━━━━*/
 // Global settings
 /*━━━━━━━━━━━━━━━━━━━━*/
-global.packname = settings?.packname || "ADEVOS X";
-global.author = settings?.author || "𝐁𝐋𝐀𝐂𝐊𝐋𝐎𝐑𝐃-𝐗 ";
+global.packname = settings?.packname || "𝐒𝐔𝐏𝐑𝐄𝐌𝐄";
+global.author = settings?.author || "𝐒𝐏𝐎𝐈𝐋𝐄𝐑 ";
 global.channelLink = "https://whatsapp.com/channel/0029Vb6wIVU9Bb5w69FQvt0W";
-global.ytchanel = "";
+global.ytchanel = "T ";
 
 const channelInfo = {
     contextInfo: {
@@ -461,7 +461,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 const cleanChatId  = (chatId?.split('@')[0] || 'N/A');
 
                 // Header — gray
-                process.stdout.write(GRAY + '╭━━━━━━━━━━━━━ Adevos-X Bot ━━━━━━━━━━━━━━◆' + RESET + '\n');
+                process.stdout.write(GRAY + '╭━━━━━━━━━━━━━ 𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐗 Bot ━━━━━━━━━━━━━━◆' + RESET + '\n');
 
                 // Label (purple) : Value (green)
                 process.stdout.write(PURPLE + '◇ Sent Time: ' + RESET + GREEN + `${dayz}, ${timez}` + RESET + '\n');
