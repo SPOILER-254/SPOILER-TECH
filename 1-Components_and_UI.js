@@ -148,9 +148,9 @@ const sections = [
     title: 'Support',
     links: [
       { label: 'Telegram Support', href: 't.me/SPOILER_TECH',      external: true },
+      { label: 'Telegram Support', href: 'https://t.me/supremelord2',      external: true },
       { label: 'WhatsApp',         href: 'https://wa.me/254108595201', external: true },
       { label: 'WhatsApp',         href: 'https://wa.me/254101512808', external: true },
-      { label: 'Telegram Bot',     href: 'https://t.me/mrsmzazixdbot', external: true },
       { label: 'Email Us',         href: 'mailto:mzazitechinc@gmail.com', external: true },
     ],
   },
