@@ -6,7 +6,7 @@
 <h3 align="center">supreme lord</h3>
 
 <p align="center">
-  <a href="https://whatsapp.com/channel/0029VbChWLcCRs1nIo0oyk2T"><img src="https://img.shields.io/badge/Channel-Follow-red?style=for-the-badge&logo=whatsapp" /></a>
+  <a href="https://whatsapp.com/channel/0029VbChWLcCRs1nIoOoyk2T  "><img src="https://img.shields.io/badge/Channel-Follow-red?style=for-the-badge&logo=whatsapp" /></a>
   <a href="https://chat.whatsapp.com/KVZmfLhBtADG84GPx0xkpE"><img src="https://img.shields.io/badge/Group-Join-black?style=for-the-badge&logo=whatsapp" /></a>
 </p>
 
