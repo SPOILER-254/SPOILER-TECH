@@ -12,16 +12,16 @@
 
 const contributors = [
   {
-    name: 'DOMINIC MOKUA KERUBO',
+    name: 'SPOILER-BM,
     role: 'Founder',
-    company: 'Mzazi Tech',
+    company: 'SPOILER-TECH,
     initials: 'DM',
     color: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
     glow: 'rgba(37,99,235,0.35)',
     badge: '🚀',
   },
   {
-    name: 'ANTONY OCHIENG',
+    name: 'SUPREME LORD,
     role: 'Founder',
     company: 'SPOILER-TECH Tech',
     initials: 'AO',
@@ -30,9 +30,9 @@ const contributors = [
     badge: '⚡',
   },
   {
-    name: 'BIG BROTHER',
+    name: 'SUPREME,
     role: 'Founder',
-    company: 'Darknode XMD',
+    company: 'JUNE-X ULTRAX',
     initials: 'BB',
     color: 'linear-gradient(135deg, #0f766e, #0d9488)',
     glow: 'rgba(15,118,110,0.35)',
