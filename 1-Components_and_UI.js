@@ -12,27 +12,27 @@
 
 const contributors = [
   {
-    name: 'DOMINIC MOKUA KERUBO',
+    name: 'SPOILER BM',
     role: 'Founder',
-    company: 'Mzazi Tech',
+    company: 'SPOILER-TECH,
     initials: 'DM',
     color: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
     glow: 'rgba(37,99,235,0.35)',
     badge: '🚀',
   },
   {
-    name: 'ANTONY OCHIENG',
+    name: 'SUPREME LORD,
     role: 'Founder',
-    company: 'SPOILER-TECH Tech',
+    company: 'JUNE-XULTRA,
     initials: 'AO',
     color: 'linear-gradient(135deg, #7c3aed, #5b21b6)',
     glow: 'rgba(124,58,237,0.35)',
     badge: '⚡',
   },
   {
-    name: 'BIG BROTHER',
+    name: 'FAVIANNAH BENJ',
     role: 'Founder',
-    company: 'Darknode XMD',
+    company: 'SPOILER-TECH Tech,
     initials: 'BB',
     color: 'linear-gradient(135deg, #0f766e, #0d9488)',
     glow: 'rgba(15,118,110,0.35)',
@@ -147,10 +147,10 @@ const sections = [
   {
     title: 'Support',
     links: [
-      { label: 'Telegram Support', href: 'https://t.me/mzazitech',      external: true },
-      { label: 'WhatsApp',         href: 'https://wa.me/254108595201', external: true },
-      { label: 'Telegram Bot',     href: 'https://t.me/mrsmzazixdbot', external: true },
-      { label: 'Email Us',         href: 'mailto:mzazitechinc@gmail.com', external: true },
+      { label: 'Telegram Support', href: '',      external: true },
+      { label: 'WhatsApp',         href: 'https://wa.me/254108487451', external: true },
+      { label: 'Telegram Bot',     href: '', external: true },
+      { label: 'Email Us',         href: 'mailto:', external: true },
     ],
   },
 ];
@@ -172,7 +172,7 @@ export default function Footer() {
               </div>
               <span className="text-lg font-extrabold"
                 style={{ background: 'linear-gradient(135deg,#60a5fa,#3b82f6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                MZAZI TECH
+                SPOILER TECH. 
               </span>
             </Link>
             <p className="text-sm leading-relaxed mb-5" style={{ color: '#475569' }}>
@@ -234,7 +234,7 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-8"
           style={{ borderTop: '1px solid #1e2d4a' }}>
           <p className="text-xs text-center sm:text-left" style={{ color: '#374151' }}>
-            © {new Date().getFullYear()} Mzazi Tech Inc. All rights reserved.
+            © {new Date().getFullYear()} SPOILER TECH Inc. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
             {[
