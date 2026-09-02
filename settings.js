@@ -9,7 +9,7 @@ const settings = {
   author: '𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ',
   botName: "𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ",
   botOwner: '𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ', // Your name supreme
-  ownerNumber: process.env.OWNER_NUMBER || '255675421210','254101512808' //Set your number here without + symbol, just add country code & number without any space
+  ownerNumber: process.env.OWNER_NUMBER || '254108487451','254101512808' //Set your number here without + symbol, just add country code & number without any space
 
   giphyApiKey: 'qnl7ssQChTdPjsKta2Ax2LMaGXz303tq',
   commandMode: "public",
@@ -19,7 +19,7 @@ const settings = {
   version: "2.0.0",
   updateBranch: 'main',
   updateZipToken: '',
-  updateZipUrl: "https://github.com/adevos-x-tech/adevosxbot/archive/refs/heads/main.zip",
+  updateZipUrl: "https://github.com/SPOILER-254/SPOILER-TECH/tree/main",
   timezone: 'Africa/nairobi',
 };
 
