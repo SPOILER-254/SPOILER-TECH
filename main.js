@@ -1789,19 +1789,19 @@ case userMessage === `${prefix}ai` || userMessage.startsWith(`${prefix}ai `): {
 }
 
 default:
-    if (isGroup) {
-        const tasks = [
-            handleTagDetection(sock, chatId, message, senderId),
-            handleMentionDetection(sock, chatId, message),
-            handleStickerDetection(sock, chatId, message, senderId)
-        ];
-        if (userMessage) tasks.unshift(handleChatbotResponse(sock, chatId, message, userMessage));
-        await Promise.allSettled(tasks);
+        if (isGroup) {
+            const tasks = [
+                handleTagDetection(sock, chatId, message, senderId),
+                handleMentionDetection(sock, chatId, message),
+                handleStickerDetection(sock, chatId, message, senderId)
+            ];
+            if (userMessage) tasks.unshift(handleChatbotResponse(sock, chatId, message, userMessage));
+            await Promise.allSettled(tasks);
+        }
+        commandExecuted = false;
+        break;
     }
-    commandExecuted = false;
-    break;
 }
-    }
 
     if (isGroup) {
         await Promise.allSettled([
@@ -1810,16 +1810,9 @@ default:
         ]);
     }
 
-        if (isGroup) {
-            await Promise.allSettled([
-                handleStickerDetection(sock, chatId, message, senderId),
-                handleImageDetection(sock, chatId, message, senderId)
-            ]);
-        }
-
         if (isAutobothEnabled())     stopBoth(sock, chatId);
         else if (isAutotypingEnabled())   stopTyping(sock, chatId);
-        else if (isAutorecordingEnabled())stopRecording(sock, chatId);
+        else if (isAutorecordingEnabled())stopRecording
 
         async function groupJidCommand(sock, chatId, message) {
             const groupJid = message.key.remoteJid;
