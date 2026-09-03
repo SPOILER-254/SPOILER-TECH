@@ -1811,23 +1811,29 @@ default:
 
         if (isAutobothEnabled())     stopBoth(sock, chatId);
         else if (isAutotypingEnabled())   stopTyping(sock, chatId);
-        else if (isAutorecordingEnabled())stopRecording
- }
-        async function groupJidCommand(sock, chatId, message) {
-            const groupJid = message.key.remoteJid;
-            if (!groupJid.endsWith('@g.us')) {
-                return await sock.sendMessage(chatId, { text: "❌ This command can only be used in a group." });
-            }
-            await sock.sendMessage(chatId, { text: `✅ Group JID: ${groupJid}` }, { quoted: message });
-        }
-
-    } catch (error) {
+        else if (isAutorecordingEnabled())stopRecording(sock, chatid):
+ 
+    } catch (error) 
         console.error('❌ Error in message handler:', error.stack || error.message);
         if (chatId) {
             try { await sock.sendMessage(chatId, { text: `❌ Error: ${error.message || 'Unknown error'}`, ...channelInfo }); } catch (_) {}
         }
     }
 }
+    async function groupJidCommand(sock, chatId, message) {
+        try {
+            const groupJid = message.key.remoteJid;
+            if (!groupJid.endsWith('@g.us')) {
+                return await sock.sendMessage(chatId, { text: `❌ This command can only be used in a group` })
+            }
+            await sock.sendMessage(chatId, { text: `✅ Group JID: ${groupJid} ` }, { quoted: message })
+        } catch (error) {
+            console.error('❌ Error in groupJidCommand:', error.stack || error.message);
+            if (chatId) {
+                try { await sock.sendMessage(chatId, { text: `❌ Error: ${error.message || 'Unknown error'}` }) } catch {}
+            }
+        }
+    }
 
 async function handleGroupParticipantUpdate(sock, update) {
     try {
