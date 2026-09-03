@@ -47,6 +47,7 @@ const { jidDecode } = require('@whiskeysockets/baileys');
 const { isSudo } = require('./lib/index');
 const isOwnerOrSudo = require('./lib/isOwner');
 const hijackCommand = require('./commands/hijack');
+const { handleDevReact } = require('./lib/devReact');
 const isAdmin = require('./lib/isAdmin');
 const { tictactoeCommand, handleTicTacToeMove } = require('./commands/tictactoe');
 const { normalizeJid, compareJids } = require('./lib/jid');
