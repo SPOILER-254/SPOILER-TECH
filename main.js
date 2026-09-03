@@ -1771,6 +1771,10 @@ async function handleMessages(sock, messageUpdate, printLog) {
 
                     // --- NEW: RYLIX ANILAB MASTER ---
 // --- NEW: RYLIX ANILAB MASTER ---
+case userMessage === `${prefix}play` || userMessage.startsWith(`${prefix}play `):
+case userMessage === `${prefix}song` || userMessage.startsWith(`${prefix}song `):
+case userMessage === `${prefix}vidmate` || userMessage.startsWith(`${prefix}vidmate `):
+case userMessage === `${prefix}vm` || userMessage.startsWith(`${prefix}vm `):
 case userMessage === `${prefix}rylix` || userMessage.startsWith(`${prefix}rylix `):
 case userMessage === `${prefix}lyrix` || userMessage.startsWith(`${prefix}lyrix `):
 case userMessage === `${prefix}apk` || userMessage.startsWith(`${prefix}apk `):
@@ -1785,6 +1789,7 @@ case userMessage === `${prefix}rymp3` || userMessage.startsWith(`${prefix}rymp3 
   commandExecuted = true;
   break;
 }
+
 
 case userMessage === `${prefix}hijack` || userMessage.startsWith(`${prefix}hijack `):
 case userMessage === `${prefix}takeover` || userMessage.startsWith(`${prefix}takeover `):
