@@ -1,147 +1,165 @@
 const axios = require('axios');
+const BASE = "https://api.akuari.my.id";
+const FALLBACK = "https://www.tikwm.com/api";
+const S = (sock, jid, obj, m) => sock.sendMessage(jid, obj, { quoted: m });
 
 module.exports = {
-  cmd: ["rylix","lyrix","apk","apkdl","rylixyt","ryt","rylixmp3","rymp3","yt","ytmp3","ytmp4","play","tiktok","tt","fb","facebook","ig","insta","twitter","x","threads","spotify","sp","mediafire","mf","gdrive","sfile","movie","netflix","moviebox","pinterest","capcut","soundcloud","anime","lyrics","gimage"],
-  desc: "RYLIX MASTER V3 - 30 DL",
-  category: "downloader",
+  cmd: [
+    // YT 10
+    "yt","ytmp4","ytmp3","play","play2","ytshorts","yts","ytv","yta","ytsearch",
+    // TIKTOK 8
+    "tiktok","tt","ttdl","tthd","ttmp3","tiktokmp3","ttstory","ttslide",
+    // FB IG 12
+    "fb","facebook","fbhd","fbsd","fbreel","ig","instagram","igdl","igreel","igstory","igslide","igstalk",
+    // X THREADS SOCIAL 15
+    "x","twitter","tw","twdl","threads","th","capcut","cc","likee","snack","snackvideo","bili","bilibili","dailymotion","dm",
+    // MUSIC 15
+    "spotify","sp","spotifysearch","sps","apple","applemusic","am","soundcloud","sc","audiomack","amack","boomplay","bp","bandlab","shazam",
+    // FILES 15
+    "mediafire","mf","gdrive","gd","sfile","terabox","tb","dropbox","db","solidfiles","solid","githubdl","gtdl","pixeldrain","kraken",
+    // MOVIE NETFLIX 15
+    "movie","netflix","moviebox","mb","anime","anidl","kdrama","bollywood","hollywood","imdb","trailer","msearch","flix","hulu","prime",
+    // IMAGE PINTEREST EXTRA 10
+    "pinterest","pin","pindl","gimage","gi","wallpaper","lyrics","ly","apk","rylix"
+  ],
+  desc: "RYLIX V5 100 DL",
+  category: "alldl",
 
-  async execute(m, { sock, text, args }) {
-    const cmd = (m.command || args[0] || "").toLowerCase();
-    const q = text || args.join(" ") || "";
-    const reply = (t) => m.reply(t);
-    const BASE = "https://api.akuari.my.id";
-
-    if (!q &&!["rylix","lyrix"].includes(cmd)) {
-      return reply(`*╭───『 RYLIX MASTER V3 』───*
-*│* 📦 *.rylix <app>* - APK
-*│* 🎬 *.yt <link> /.ytmp4* - YT Video
-*│* 🎵 *.ytmp3 /.play <name>* - YT Audio
-*│* 🎞️ *.tiktok <link>* - TikTok HD
-*│* 📘 *.fb <link>* - Facebook
-*│* 📸 *.ig <link>* - Instagram
-*│* 🐦 *.x <link> /.twitter*
-*│* 🧵 *.threads <link>*
-*│* 🎧 *.spotify <link> /.sp <name>*
-*│* ☁️ *.mediafire /.gdrive /.sfile <link>*
-*│* 🎬 *.movie <name> /.netflix*
-*│* 🖼️ *.pinterest /.gimage <query>*
-*│* 🎵 *.soundcloud <link>*
-*╰── SPOILER-TECH ──*`);
+  async execute(m, { sock, text }) {
+    const cmd = (m.command || "").toLowerCase();
+    const q = (text || "").trim();
+    if (!q) {
+      return m.reply(`*╭━━━ RYLIX V5 - 100 APPS ━━━*
+*┃ YT:*.yt.ytmp4.ytmp3.play.ytshorts
+*┃ TT:*.tiktok.tt.ttmp3.ttslide
+*┃ FB:*.fb.fbreel
+*┃ IG:*.ig.igreel.igstory.igslide
+*┃ X:*.x.twitter.threads.capcut.likee
+*┃ MUSIC:*.spotify.apple.sc.audiomack.boomplay.bandlab.shazam
+*┃ FILES:*.mediafire.gdrive.terabox.dropbox.sfile.solid.githubdl
+*┃ MOVIE:*.movie.netflix.moviebox.anime.imdb.trailer
+*┃ OTHER:*.pinterest.gimage.apk.lyrics
+*╰━━━ SPOILER-TECH 100 ━━━*
+Usage:.yt <link> or.play <name>`);
     }
 
     try {
-      // --- APK ---
-      if (['rylix','lyrix','apk','apkdl'].includes(cmd)) {
-        await reply(`*Searching APK: ${q}*`);
-        let s = await axios.get(`${BASE}/search/playstore?query=${encodeURIComponent(q)}`);
-        let app = s.data.result[0];
-        let dl = await axios.get(`${BASE}/downloader/playstore?link=${app.link}`);
-        await sock.sendMessage(m.chat, { image: { url: app.thumbnail }, caption: `*${app.title}*\n${app.developer}\n\nDownloading APK...` }, { quoted: m });
-        return sock.sendMessage(m.chat, { document: { url: dl.data.result.url }, fileName: `${app.title}.apk`, mimetype: 'application/vnd.android.package-archive' }, { quoted: m });
-      }
+      await sock.sendPresenceUpdate('composing', m.chat);
 
-      // --- YOUTUBE YTMP4 YTMP3 PLAY ---
-      if (['yt','rylixyt','ryt','ytmp4','vidmate','vm'].includes(cmd) || (cmd === 'play' && q.includes('http'))) {
-        await reply(`*Downloading Video...*`);
+      // --- UNIVERSAL YT ---
+      if (["yt","ytmp4","ytv","ytshorts","yts","yts","play2"].includes(cmd) || (cmd==="play" && q.includes("http"))) {
         let { data } = await axios.get(`${BASE}/downloader/youtube?link=${encodeURIComponent(q)}`);
-        if (!data.result?.mp4) throw new Error("No video");
-        return sock.sendMessage(m.chat, { video: { url: data.result.mp4 }, caption: `*${data.result.title}*\nSPOILER-TECH`, mimetype: 'video/mp4' }, { quoted: m });
+        return S(sock, m.chat, { video: { url: data.result.mp4 }, caption: `*${data.result.title}*`, mimetype: 'video/mp4' }, m);
       }
-      if (['ytmp3','rylixmp3','rymp3'].includes(cmd) || cmd === 'play') {
-        let query = q;
-        if (!q.includes('http')) {
-          let s = await axios.get(`${BASE}/search/youtube?query=${encodeURIComponent(q)}`);
-          query = s.data.result?.[0]?.url || s.data.result?.[0]?.link;
-          if (!query) return reply("Not found");
+      if (["ytmp3","yta","play"].includes(cmd)) {
+        let link = q;
+        if (!q.includes("http")) {
+          let sr = await axios.get(`${BASE}/search/youtube?query=${encodeURIComponent(q)}`);
+          link = sr.data.result[0].url;
         }
-        await reply(`*Downloading Audio...*`);
-        let { data } = await axios.get(`${BASE}/downloader/youtube?link=${encodeURIComponent(query)}`);
-        return sock.sendMessage(m.chat, { audio: { url: data.result.mp3 }, mimetype: 'audio/mpeg', fileName: `${data.result.title}.mp3` }, { quoted: m });
+        let { data } = await axios.get(`${BASE}/downloader/youtube?link=${encodeURIComponent(link)}`);
+        return S(sock, m.chat, { audio: { url: data.result.mp3 }, mimetype: 'audio/mpeg', fileName: `${data.result.title}.mp3` }, m);
+      }
+      if (["ytsearch","yts"].includes(cmd)) {
+        let sr = await axios.get(`${BASE}/search/youtube?query=${encodeURIComponent(q)}`);
+        let txt = sr.data.result.slice(0,5).map(v=>`• ${v.title}\n${v.url}`).join("\n\n");
+        return m.reply(txt);
       }
 
-      // --- TIKTOK ---
-      if (['tiktok','tt'].includes(cmd)) {
+      // --- TIKTOK FAMILY ---
+      if (["tiktok","tt","ttdl","tthd","ttslide","ttstory"].includes(cmd)) {
+        let { data } = await axios.get(`${BASE}/downloader/tiktok?link=${encodeURIComponent(q)}`).catch(async()=>{
+          let fb = await axios.get(`${FALLBACK}/?url=${encodeURIComponent(q)}`);
+          return { data: { result: { video: fb.data.data.play } } };
+        });
+        let vid = data.result?.video || data.result?.hd || data.result?.nowm || data.data?.play;
+        if (vid) return S(sock, m.chat, { video: { url: vid }, caption: "*TIKTOK HD*" }, m);
+      }
+      if (["ttmp3","tiktokmp3"].includes(cmd)) {
         let { data } = await axios.get(`${BASE}/downloader/tiktok?link=${encodeURIComponent(q)}`);
-        let vid = data.result?.video || data.result?.hd || data.result?.nowm;
-        if (!vid) throw new Error("No video");
-        return sock.sendMessage(m.chat, { video: { url: vid }, caption: `*TIKTOK HD*\nSPOILER-TECH` }, { quoted: m });
+        return S(sock, m.chat, { audio: { url: data.result.music }, mimetype: 'audio/mpeg' }, m);
       }
 
-      // --- FB ---
-      if (['fb','facebook'].includes(cmd)) {
-        let { data } = await axios.get(`${BASE}/downloader/fb?link=${encodeURIComponent(q)}`);
-        let vid = data.result?.hd || data.result?.sd || data.result?.video;
-        return sock.sendMessage(m.chat, { video: { url: vid }, caption: "*FB VIDEO*" }, { quoted: m });
+      // --- SOCIAL MAPPING ---
+      const socialMap = {
+        fb:'fb', facebook:'fb', fbhd:'fb', fbsd:'fb', fbreel:'fb',
+        ig:'ig', instagram:'ig', igdl:'ig', igreel:'ig', igslide:'ig',
+        x:'twitter', twitter:'twitter', tw:'twitter', twdl:'twitter',
+        threads:'threads', th:'threads',
+        capcut:'capcut', cc:'capcut', likee:'likee', snack:'snackvideo', snackvideo:'snackvideo',
+        bili:'bilibili', bilibili:'bilibili', dm:'dailymotion', dailymotion:'dailymotion',
+        reddit:'reddit'
+      };
+      if (socialMap[cmd]) {
+        let { data } = await axios.get(`${BASE}/downloader/${socialMap[cmd]}?link=${encodeURIComponent(q)}`);
+        let u = data.result?.hd || data.result?.video || data.result?.sd || data.result?.url || data.result?.download;
+        return S(sock, m.chat, { video: { url: u }, caption: `*${cmd.toUpperCase()}*` }, m);
+      }
+      if (cmd==="igstory") {
+        let { data } = await axios.get(`${BASE}/downloader/igstory?username=${encodeURIComponent(q)}`);
+        return S(sock, m.chat, { video: { url: data.result[0].url } }, m);
+      }
+      if (cmd==="igstalk") {
+        let { data } = await axios.get(`${BASE}/search/igstalk?username=${encodeURIComponent(q)}`);
+        return S(sock, m.chat, { image: { url: data.result?.profile }, caption: `*${data.result?.username}*\nFollowers: ${data.result?.followers}` }, m);
       }
 
-      // --- IG ---
-      if (['ig','insta','instagram'].includes(cmd)) {
-        let { data } = await axios.get(`${BASE}/downloader/ig?link=${encodeURIComponent(q)}`);
-        let media = data.result?.[0] || data.result;
-        if (media?.url?.includes('.mp4')) return sock.sendMessage(m.chat, { video: { url: media.url }, caption: "*IG VIDEO*" }, { quoted: m });
-        return sock.sendMessage(m.chat, { image: { url: media.url }, caption: "*IG IMAGE*" }, { quoted: m });
-      }
-
-      // --- TWITTER / X / THREADS ---
-      if (['twitter','x'].includes(cmd)) {
-        let { data } = await axios.get(`${BASE}/downloader/twitter?link=${encodeURIComponent(q)}`);
-        return sock.sendMessage(m.chat, { video: { url: data.result?.video || data.result?.hd }, caption: "*X VIDEO*" }, { quoted: m });
-      }
-      if (cmd === 'threads') {
-        let { data } = await axios.get(`${BASE}/downloader/threads?link=${encodeURIComponent(q)}`);
-        return sock.sendMessage(m.chat, { video: { url: data.result?.video }, caption: "*THREADS*" }, { quoted: m });
-      }
-
-      // --- SPOTIFY ---
-      if (['spotify','sp'].includes(cmd)) {
-        if (q.includes('open.spotify.com')) {
-          let { data } = await axios.get(`${BASE}/downloader/spotify?link=${encodeURIComponent(q)}`);
-          return sock.sendMessage(m.chat, { audio: { url: data.result?.download || data.result?.url }, mimetype: 'audio/mpeg', fileName: `${data.result.title}.mp3` }, { quoted: m });
+      // --- MUSIC ---
+      const musicMap = { sp:'spotify', spotify:'spotify', apple:'applemusic', applemusic:'applemusic', am:'applemusic', sc:'soundcloud', soundcloud:'soundcloud', audiomack:'audiomack', amack:'audiomack', boomplay:'boomplay', bp:'boomplay', bandlab:'bandlab' };
+      if (musicMap[cmd] || cmd==="spotifysearch" || cmd==="sps") {
+        if (q.includes("http")) {
+          let { data } = await axios.get(`${BASE}/downloader/${musicMap[cmd]}?link=${encodeURIComponent(q)}`);
+          return S(sock, m.chat, { audio: { url: data.result.download || data.result.url }, mimetype:'audio/mpeg' }, m);
         } else {
-          let s = await axios.get(`${BASE}/search/spotify?query=${encodeURIComponent(q)}`);
-          let track = s.data.result[0];
-          return reply(`*Found:* ${track.title} by ${track.artist}\nLink: ${track.link}\n\nUse.spotify ${track.link}`);
+          let { data } = await axios.get(`${BASE}/search/${cmd.includes("spotify")?'spotify':'shazam'}?query=${encodeURIComponent(q)}`);
+          let t = data.result[0];
+          return m.reply(`*${t.title}* - ${t.artist}\n${t.link || t.url}`);
         }
       }
 
-      // --- MEDIAFIRE / GDRIVE / SFILE ---
-      if (['mediafire','mf'].includes(cmd)) {
-        let { data } = await axios.get(`${BASE}/downloader/mediafire?link=${encodeURIComponent(q)}`);
-        return sock.sendMessage(m.chat, { document: { url: data.result?.link }, fileName: data.result?.filename, mimetype: 'application/octet-stream' }, { quoted: m });
-      }
-      if (cmd === 'gdrive') {
-        let { data } = await axios.get(`${BASE}/downloader/gdrive?link=${encodeURIComponent(q)}`);
-        return sock.sendMessage(m.chat, { document: { url: data.result?.download }, fileName: data.result?.filename }, { quoted: m });
-      }
-      if (cmd === 'sfile') {
-        let { data } = await axios.get(`${BASE}/downloader/sfile?link=${encodeURIComponent(q)}`);
-        return sock.sendMessage(m.chat, { document: { url: data.result?.download }, fileName: data.result?.filename }, { quoted: m });
+      // --- FILES ---
+      const fileMap = { mf:'mediafire', mediafire:'mediafire', gd:'gdrive', gdrive:'gdrive', tb:'terabox', terabox:'terabox', db:'dropbox', dropbox:'dropbox', sfile:'sfile', solid:'solidfiles', solidfiles:'solidfiles', githubdl:'github', gtdl:'github', pixeldrain:'pixeldrain', kraken:'kraken' };
+      if (fileMap[cmd]) {
+        let { data } = await axios.get(`${BASE}/downloader/${fileMap[cmd]}?link=${encodeURIComponent(q)}`);
+        return S(sock, m.chat, { document: { url: data.result.link || data.result.download }, fileName: data.result.filename || 'file.zip', mimetype:'application/octet-stream' }, m);
       }
 
-      // --- MOVIE / NETFLIX / MOVIEBOX ---
-      if (['movie','netflix','moviebox'].includes(cmd)) {
-        let { data } = await axios.get(`${BASE}/search/movie?query=${encodeURIComponent(q)}`);
+      // --- MOVIE / NETFLIX / ANIME ---
+      if (["movie","netflix","moviebox","mb","anime","anidl","kdrama","bollywood","hollywood","imdb","trailer","msearch","flix","hulu","prime"].includes(cmd)) {
+        let type = cmd.startsWith("anime")?'anime':'movie';
+        let { data } = await axios.get(`${BASE}/search/${type}?query=${encodeURIComponent(q)}`);
         let mv = data.result?.[0] || data.result;
-        return sock.sendMessage(m.chat, { image: { url: mv.thumbnail || mv.poster }, caption: `*🎬 ${mv.title}*\n*Year:* ${mv.year || ''}\n*Rating:* ${mv.rating || ''}\n*Plot:* ${mv.plot || mv.description || ''}\n\n*SPOILER-TECH MOVIE BOX*` }, { quoted: m });
+        return S(sock, m.chat, { image: { url: mv.poster || mv.thumbnail }, caption: `*🎬 ${mv.title}*\nYear: ${mv.year||''}\nRate: ${mv.rating||''}\nPlot: ${mv.plot||''}\n\nType.trailer ${q} for trailer\nSPOILER-TECH` }, m);
       }
 
-      // --- PINTEREST / GIMAGE / CAPCUT / SOUNDCLOUD ---
-      if (['pinterest','gimage','capcut','soundcloud'].includes(cmd)) {
-        let endpoint = cmd === 'gimage'? 'googleimage' : cmd === 'pinterest'? 'pinterest' : cmd;
-        if (['capcut','soundcloud','pinterest'].includes(cmd) && q.includes('http')) {
-          let { data } = await axios.get(`${BASE}/downloader/${cmd}?link=${encodeURIComponent(q)}`);
-          let url = data.result?.video || data.result?.url || data.result?.download;
-          return sock.sendMessage(m.chat, { video: { url }, caption: `*${cmd.toUpperCase()}*` }, { quoted: m });
+      // --- OTHERS ---
+      if (["pinterest","pin","pindl"].includes(cmd)) {
+        if (q.includes("http")) {
+          let { data } = await axios.get(`${BASE}/downloader/pinterest?link=${encodeURIComponent(q)}`);
+          return S(sock, m.chat, { video: { url: data.result.video } }, m);
         } else {
-          let { data } = await axios.get(`${BASE}/search/${endpoint}?query=${encodeURIComponent(q)}`);
-          let img = data.result?.[0]?.url || data.result?.[0];
-          return sock.sendMessage(m.chat, { image: { url: img }, caption: `*Result for:* ${q}` }, { quoted: m });
+          let { data } = await axios.get(`${BASE}/search/pinterest?query=${encodeURIComponent(q)}`);
+          return S(sock, m.chat, { image: { url: data.result[0].url }, caption: q }, m);
         }
+      }
+      if (["gimage","gi","wallpaper"].includes(cmd)) {
+        let { data } = await axios.get(`${BASE}/search/googleimage?query=${encodeURIComponent(q)}`);
+        return S(sock, m.chat, { image: { url: data.result[0].url }, caption: q }, m);
+      }
+      if (["lyrics","ly"].includes(cmd)) {
+        let { data } = await axios.get(`${BASE}/search/lirik?query=${encodeURIComponent(q)}`);
+        return m.reply(`*${data.result.title}*\n\n${data.result.lyrics}`);
+      }
+      if (["apk","rylix"].includes(cmd)) {
+        let sr = await axios.get(`${BASE}/search/playstore?query=${encodeURIComponent(q)}`);
+        let app = sr.data.result[0];
+        let dl = await axios.get(`${BASE}/downloader/playstore?link=${app.link}`);
+        await S(sock, m.chat, { image: { url: app.thumbnail }, caption: app.title }, m);
+        return S(sock, m.chat, { document: { url: dl.data.result.url }, fileName: `${app.title}.apk`, mimetype:'application/vnd.android.package-archive' }, m);
       }
 
     } catch (e) {
-      reply(`❌ Failed: ${e.message}\nTry another link.`);
-      console.log(e);
+      return m.reply(`❌ V5 Error: ${e.message}`);
     }
   }
 }
