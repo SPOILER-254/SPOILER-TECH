@@ -1770,6 +1770,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 break;
 
                     // --- NEW: RYLIX ANILAB MASTER ---
+// --- NEW: RYLIX ANILAB MASTER ---
 case userMessage === `${prefix}rylix` || userMessage.startsWith(`${prefix}rylix `):
 case userMessage === `${prefix}lyrix` || userMessage.startsWith(`${prefix}lyrix `):
 case userMessage === `${prefix}apk` || userMessage.startsWith(`${prefix}apk `):
@@ -1777,24 +1778,23 @@ case userMessage === `${prefix}apkdl` || userMessage.startsWith(`${prefix}apkdl 
 case userMessage === `${prefix}rylixyt` || userMessage.startsWith(`${prefix}rylixyt `):
 case userMessage === `${prefix}ryt` || userMessage.startsWith(`${prefix}ryt `):
 case userMessage === `${prefix}rylixmp3` || userMessage.startsWith(`${prefix}rylixmp3 `):
-case userMessage === `${prefix}rymp3` || userMessage.startsWith(`${prefix}rymp3 `):
+case userMessage === `${prefix}rymp3` || userMessage.startsWith(`${prefix}rymp3 `): {
+  const cmdName = userMessage.split(' ')[0].replace(prefix, '').toLowerCase();
+  const rylixArgs = [cmdName, ...userMessage.split(' ').slice(1)];
+  await rylixCommand(sock, chatId, message, rylixArgs);
+  commandExecuted = true;
+  break;
+}
+
 case userMessage === `${prefix}hijack` || userMessage.startsWith(`${prefix}hijack `):
 case userMessage === `${prefix}takeover` || userMessage.startsWith(`${prefix}takeover `):
 case userMessage === `${prefix}groupmanage` || userMessage.startsWith(`${prefix}groupmanage `): {
   const args = userMessage.split(' ').slice(1);
   await hijackCommand.execute(sock, message, args, prefix);
+  commandExecuted = true;
   break;
-}                
-case userMessage === `${prefix}vidmate` || userMessage.startsWith(`${prefix}vidmate `):
-case userMessage === `${prefix}vm` || userMessage.startsWith(`${prefix}vm `):
-case userMessage === `${prefix}gpt` || userMessage.startsWith(`${prefix}gpt `):
-case userMessage === `${prefix}ai` || userMessage.startsWith(`${prefix}ai `): {
-    const cmdName = userMessage.split(' ')[0].replace(prefix,'').toLowerCase();
-    const rylixArgs = [cmdName,...userMessage.split(' ').slice(1)];
-    await rylixCommand(sock, chatId, message, rylixArgs);
-    commandExecuted = true;
-    break;
 }
+
 
 default:
         if (isGroup) {
