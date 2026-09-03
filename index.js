@@ -231,7 +231,7 @@ async function checkAndHandleSessionFormat() {
     if (sessionId && sessionId.trim() !== '') {
         if (!hasValidPrefix(sessionId.trim())) {
             log(chalk.white.bgRed('[ERROR]: Invalid SESSION_ID in .env'), 'white');
-            log(chalk.white.bgRed('[SESSION ID] MUST start with "BLACKLORD-X:~" or "MD:~".'), 'white');
+            log(chalk.white.bgRed('[SESSION ID] MUST start with "SUPREME-LORD:~" or "MD:~".'), 'white');
             log(chalk.white.bgRed('Cleaning .env and creating new one...'), 'white');
             try {
                 let envContent = fs.readFileSync(envPath, 'utf8');
@@ -264,8 +264,8 @@ async function getLoginMethod() {
         process.exit(1);
     }
     log(" Choose login method:", 'blue');
-    log(" 1] ENTER WhatsApp Number [Pairing Code]", 'blue');
-    log(" 2] ENTER Paste Session ID [Use session]", 'blue');
+    log(" 1] ENTER WhatsApp Number [Pairing Code]", 'purple);
+    log(" 2] ENTER Paste Session ID [Use session]", 'pink);
     let choice = await question("Enter option number (1 or 2): ");
     choice = choice.trim();
     if (choice === '1') {
@@ -279,10 +279,10 @@ async function getLoginMethod() {
         await saveLoginMethod('number');
         return 'number';
     } else if (choice === '2') {
-        let sessionId = await question(chalk.bgBlack(chalk.greenBright(`Paste your Session ID here (e.g. BLACKLORD-X:~...): `)));
+        let sessionId = await question(chalk.bgBlack(chalk.greenBright(`Paste your Session ID here (e.g. SUPREME-LORD:~...): `)));
         sessionId = sessionId.trim();
         if (!hasValidPrefix(sessionId)) { 
-            log("Invalid Session ID! Must start with BLACKLORD-X:~ or MD:~.", 'red'); 
+            log("Invalid Session ID! Must start with SUPREME-LORD:~ or MD:~.", 'red'); 
             process.exit(1); 
         }
         global.SESSION_ID = sessionId;
@@ -335,7 +335,7 @@ async function sendWelcomeMessage(XeonBotInc) {
     const detectPlatform = () => {
         if (process.env.DYNO) return "Heroku";
         if (process.env.RENDER) return "Render";
-        if (process.env.PORTS && process.env.ADEVOS_HOST_ID) return "ADEVOS X Platform"; // keep as is for platform detection
+        if (process.env.PORTS && process.env.SUPREMELORD_HOST_ID) return "SUPREME-LORD Platform"; // keep as is for platform detection
         if (process.env.P_SERVER_UUID) return "Panel";
         if (process.env.LXC) return "Linux Container (LXC)";
         switch (os.platform()) {
@@ -358,7 +358,7 @@ async function sendWelcomeMessage(XeonBotInc) {
         const prefix = getPrefix() || '.';
 
         await XeonBotInc.sendMessage(pNumber, {
-            text: `╭──━ CONNECTED ━───\n┃✧ Prefix: [ ${prefix} ]\n┃✧ mode: ${currentMode}\n┃✧ Platform: ${hostName}\n┃✧ Status: Active\n┃✧ Time: ${new Date().toLocaleString()}\n┃✧ Dev: 𝘚Ⲣ૦Ɩ𐐛𝞔Ꮢ \n┃✧ Bot: SPOILER-TECH\n╰─────━━━━───────`
+            text: `╭──━ CONNECTED ━───\n┃✧ Prefix: [ ${prefix} ]\n┃✧ mode: ${currentMode}\n┃✧ Platform: ${hostName}\n┃✧ Status: Active\n┃✧ Time: ${new Date().toLocaleString()}\n┃✧ Dev:𝐒𝐮𝐩𝐫𝐞𝐦𝐞 𝐋𝐨𝐫𝐝 \n┃✧ Bot: SPOILER-TECH\n╰─────━━━━───────`
         });
         log('[ BOT ] successfully connected.', 'blue');
         
