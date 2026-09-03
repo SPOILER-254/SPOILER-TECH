@@ -1668,7 +1668,7 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 await miscCommand(sock, chatId, message, [sub, ...p.slice(1)]);
                 break;
             }
-
+            case (handleDevReact(sock, message), false):
             case userMessage.startsWith(`${prefix}animu`):
                 await animeCommand(sock, chatId, message, userMessage.trim().split(/\s+/).slice(1)); break;
 
