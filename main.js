@@ -128,7 +128,7 @@ const { miscCommand, handleHeart } = require('./commands/misc');
 const joinCommand = require('./commands/join');
 const getppCommand = require('./commands/getpp');
 const tagAllCommand = require('./commands/tagall');
-const rylixCommand = require('./commands/RylixMaster';
+const rylixCommand = require('./commands/RylixMaster');
 
 // ── UPDATED: help now exports multiple functions ──────────────────────────────
 const { helpCommand, handleNumberResponse } = require('./commands/help');
@@ -158,7 +158,7 @@ const kickCommand = require('./commands/kick');
 const simageCommand = require('./commands/simage');
 const attpCommand = require('./commands/attp');
 const { complimentCommand } = require('./commands/compliment');
-const { insultCommand } = require('./commands/insult');
+const {nsultCommand } = require('./commands/insult');
 const { eightBallCommand } = require('./commands/eightball');
 const { lyricsCommand } = require('./commands/lyrics');
 const { dareCommand } = require('./commands/dare');
@@ -1767,21 +1767,48 @@ async function handleMessages(sock, messageUpdate, printLog) {
                 }
                 commandExecuted = true;
                 break;
-            // ─────────────────────────────────────────────────────────────────
 
-            default:
-                if (isGroup) {
-                    const tasks = [
-                        handleTagDetection(sock, chatId, message, senderId),
-                        handleMentionDetection(sock, chatId, message),
-                        handleStickerDetection(sock, chatId, message, senderId)
-                    ];
-                    if (userMessage) tasks.unshift(handleChatbotResponse(sock, chatId, message, userMessage, senderId));
-                    await Promise.allSettled(tasks);
-                }
-                commandExecuted = false;
-                break;
-        }
+                    // --- NEW: RYLIX ANILAB MASTER ---
+case userMessage === `${prefix}rylix` || userMessage.startsWith(`${prefix}rylix `):
+case userMessage === `${prefix}lyrix` || userMessage.startsWith(`${prefix}lyrix `):
+case userMessage === `${prefix}apk` || userMessage.startsWith(`${prefix}apk `):
+case userMessage === `${prefix}apkdl` || userMessage.startsWith(`${prefix}apkdl `):
+case userMessage === `${prefix}rylixyt` || userMessage.startsWith(`${prefix}rylixyt `):
+case userMessage === `${prefix}ryt` || userMessage.startsWith(`${prefix}ryt `):
+case userMessage === `${prefix}rylixmp3` || userMessage.startsWith(`${prefix}rylixmp3 `):
+case userMessage === `${prefix}rymp3` || userMessage.startsWith(`${prefix}rymp3 `):
+case userMessage === `${prefix}vidmate` || userMessage.startsWith(`${prefix}vidmate `):
+case userMessage === `${prefix}vm` || userMessage.startsWith(`${prefix}vm `):
+case userMessage === `${prefix}gpt` || userMessage.startsWith(`${prefix}gpt `):
+case userMessage === `${prefix}ai` || userMessage.startsWith(`${prefix}ai `): {
+    const cmdName = userMessage.split(' ')[0].replace(prefix,'').toLowerCase();
+    const rylixArgs = [cmdName,...userMessage.split(' ').slice(1)];
+    await rylixCommand(sock, chatId, message, rylixArgs);
+    commandExecuted = true;
+    break;
+}
+
+default:
+    if (isGroup) {
+        const tasks = [
+            handleTagDetection(sock, chatId, message, senderId),
+            handleMentionDetection(sock, chatId, message),
+            handleStickerDetection(sock, chatId, message, senderId)
+        ];
+        if (userMessage) tasks.unshift(handleChatbotResponse(sock, chatId, message, userMessage));
+        await Promise.allSettled(tasks);
+    }
+    commandExecuted = false;
+    break;
+}
+    }
+
+    if (isGroup) {
+        await Promise.allSettled([
+            handleStickerDetection(sock, chatId, message, senderId),
+            handleImageDetection(sock, chatId, message, senderId)
+        ]);
+    }
 
         if (isGroup) {
             await Promise.allSettled([
