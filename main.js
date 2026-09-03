@@ -330,7 +330,8 @@ const pendingCommand = require('./commands/pending');
 /*━━━━━━━━━━━━━━━━━━━━*/
 global.packname = settings?.packname || "𝐒𝐔𝐏𝐑𝐄𝐌𝐄";
 global.author = settings?.author || "𝐒𝐏𝐎𝐈𝐋𝐄𝐑 ";
-global.channelLink = "https://whatsapp.com/channel/0029Vb6wIVU9Bb5w69FQvt0W";
+global.channelLink = "lhttps://whatsapp.com/channel/0029VbDLaRc3mFY1E4qg650l";
+global.channelLink = "lhttps://whatsapp.com/channel/0029VbChWLcCRs1nIoOoyk2T";";
 global.ytchanel = "T ";
 
 const channelInfo = {
