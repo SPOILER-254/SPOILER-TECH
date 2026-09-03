@@ -1,85 +1,95 @@
-require('dotenv').config();
+const BASE = "https://api.akuari.my.id";
 
-global.APIs = {
-  // CORE
-  xteam: 'https://api.xteam.xyz',
-  dzx: 'https://api.dhamzxploit.my.id',
-  lol: 'https://api.lolhuman.xyz',
-  violetics: 'https://violetics.pw',
-  neoxr: 'https://api.neoxr.my.id',
-  zenzapis: 'https://zenzapis.xyz',
-  akuari: 'https://api.akuari.my.id',
-  akuari2: 'https://apimu.my.id',
-  nrtm: 'https://fg-nrtm.ddns.net',
-  bg: 'http://bochil.ddns.net',
-  fgmods: 'https://api-fgmods.ddns.net',
+// YOUTUBE 10
+1.  /downloader/youtube?link=
+2.  /downloader/youtube2?link=
+3.  /downloader/youtube3?link=
+4.  /downloader/ytmp3?link=
+5.  /downloader/ytmp4?link=
+6.  /search/youtube?query=
+7.  /search/youtube2?query=
+8.  /downloader/youtubeaudio?link=
+9.  /downloader/youtubevideo?link=
+10. /search/ytshort?query=
 
-  // SOCIAL DOWNLOADER
-  tiktok: 'https://api.lolhuman.xyz',
-  instagram: 'https://api.lolhuman.xyz',
-  facebook: 'https://api.lolhuman.xyz',
-  youtube: 'https://api.lolhuman.xyz',
-  yta: 'https://api.lolhuman.xyz',
-  ytv: 'https://api.lolhuman.xyz',
-  yt: 'https://api.lolhuman.xyz',
-  vidmate: 'https://api.vidmate-official.my.id',
+// TIKTOK 10
+11. /downloader/tiktok?link=
+12. /downloader/tiktok2?link=
+13. /downloader/tiktok3?link=
+14. /downloader/tikwm?link=
+15. /search/tiktok?query=
+16. /downloader/tiktokslide?link=
+17. /downloader/tiktokmp3?link=
+18. /downloader/tiktokstory?link=
+19. /downloader/tiktokphoto?link=
+20. /search/tiktoktrending?query=
 
-  // ANIME
-  anilab: 'https://api.jikan.moe',
-  anilist: 'https://graphql.anilist.co',
-  crunchyroll: 'https://api.lolhuman.xyz',
+// FB IG TWITTER 10
+21. /downloader/fb?link=
+22. /downloader/fb2?link=
+23. /downloader/fbreels?link=
+24. /downloader/ig?link=
+25. /downloader/ig2?link=
+26. /downloader/igstory?username=
+27. /downloader/igreels?link=
+28. /downloader/twitter?link=
+29. /downloader/twitter2?link=
+30. /downloader/threads?link=
 
-  // BROWSER / SEARCH
-  google: 'https://api.lolhuman.xyz',
-  chrome: 'https://api.duckduckgo.com',
-  opera: 'https://api.duckduckgo.com',
-  operamini: 'https://api.duckduckgo.com',
-  bing: 'https://api.bing.microsoft.com',
+// MUSIC 15
+31. /downloader/spotify?link=
+32. /downloader/spotify2?link=
+33. /search/spotify?query=
+34. /search/spotify2?query=
+35. /downloader/soundcloud?link=
+36. /search/soundcloud?query=
+37. /downloader/applemusic?link=
+38. /search/applemusic?query=
+39. /downloader/audiomack?link=
+40. /downloader/boomplay?link=
+41. /downloader/shazam?link=
+42. /search/shazam?query=
+43. /search/lirik?query=
+44. /search/lyrics?query=
+45. /downloader/tiktokmusic?link=
 
-  // AI - ALL
-  openai: 'https://api.openai.com/v1',
-  chatgpt: 'https://api.openai.com/v1',
-  gpt: 'https://api.openai.com/v1',
-  gpt4: 'https://api.neoxr.my.id',
-  metaai: 'https://www.blackbox.ai',
-  meta: 'https://www.blackbox.ai',
-  gemini: 'https://generativelanguage.googleapis.com',
-  deepseek: 'https://api.deepseek.com',
-  deepseek_ai: 'https://api.deepseek.com',
-  claude: 'https://api.anthropic.com',
-  blackbox: 'https://www.blackbox.ai',
-  questionai: 'https://api.akuari.my.id',
-  
-  // RYLIX + EXTRA APPS
-  rylix: 'https://api.rylixapi.my.id',
-  rylix2: 'https://rylix-api.vercel.app',
-  apk: 'https://api.rylixapi.my.id',
-  appstore: 'https://api.rylixapi.my.id'
-};
+// FILES APK 10
+46. /search/playstore?query=
+47. /downloader/playstore?link=
+48. /downloader/mediafire?link=
+49. /downloader/mediafire2?link=
+50. /downloader/gdrive?link=
+51. /downloader/gdrive2?link=
+52. /downloader/sfile?link=
+53. /downloader/terabox?link=
+54. /downloader/dropbox?link=
+55. /downloader/github?link=
 
-global.APIKeys = {
-  'https://api.xteam.xyz': process.env.XTEAM_KEY || 'd90a9e986e18778b',
-  'https://api.lolhuman.xyz': process.env.LOLHUMAN_KEY || '85faf7170545d1407659ad',
-  'https://api.neoxr.my.id': process.env.NEoxR_KEY || 'yourkey',
-  'https://violetics.pw': process.env.VIOLETICS_KEY || 'beta',
-  'https://zenzapis.xyz': process.env.ZENZ_KEY || 'yourkey',
-  'https://api-fgmods.ddns.net': process.env.FGMODS_KEY || 'fg-dylux',
-  'https://api.jikan.moe': 'free',
-  'https://graphql.anilist.co': 'free',
-  'https://api.duckduckgo.com': 'free',
-  'https://api.vidmate-official.my.id': 'free',
-  'https://api.deepseek.com': process.env.DEEPSEEK_KEY || 'free',
-  'https://api.openai.com/v1': process.env.OPENAI_KEY || 'sk-xxx',
-  'https://generativelanguage.googleapis.com': process.env.GEMINI_KEY || 'free',
-  'https://www.blackbox.ai': 'free',
-  'https://api.akuari.my.id': 'free',
-  'https://api.rylixapi.my.id': 'free',
-  'https://rylix-api.vercel.app': 'free'
-};
+// MOVIE ANIME 10
+56. /search/movie?query=
+57. /search/movie2?query=
+58. /search/netflix?query=
+59. /search/moviebox?query=
+60. /search/anime?query=
+61. /search/anime2?query=
+62. /search/kdrama?query=
+63. /downloader/anime?link=
+64. /search/imdb?query=
+65. /search/trailer?query=
 
-module.exports = {
-  SESSION_ID: global.SESSION_ID || process.env.SESSION_ID,
-  WARN_COUNT: 3,
-  APIs: global.APIs,
-  APIKeys: global.APIKeys
-};
+// IMAGE AI OTHER 15
+66. /search/googleimage?query=
+67. /search/pinterest?query=
+68. /downloader/pinterest?link=
+69. /search/wallpaper?query=
+70. /ai/flux?prompt=
+71. /ai/gpt?chat=
+72. /ai/gemini?chat=
+73. /ai/bard?chat=
+74. /ai/blackbox?chat=
+75. /search/google?query=
+76. /search/wikipedia?query=
+77. /downloader/capcut?link=
+78. /downloader/likee?link=
+79. /downloader/snackvideo?link=
+80. /downloader/bilibili?link=
