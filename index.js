@@ -201,7 +201,7 @@ function sessionExists() {
     return fs.existsSync(credsPath);
 }
 
-const VALID_PREFIXES = ['BLACKLORD-X:~','MD:~'];
+const VALID_PREFIXES = ['SUPREME-LORD:~','MD:~'];
 
 function hasValidPrefix(id) {
     return VALID_PREFIXES.some(p => id.includes(p));
