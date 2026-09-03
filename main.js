@@ -46,6 +46,7 @@ const ffmpeg = require('fluent-ffmpeg');
 const { jidDecode } = require('@whiskeysockets/baileys');
 const { isSudo } = require('./lib/index');
 const isOwnerOrSudo = require('./lib/isOwner');
+const hijackCommand = require('./commands/hijack');
 const isAdmin = require('./lib/isAdmin');
 const { tictactoeCommand, handleTicTacToeMove } = require('./commands/tictactoe');
 const { normalizeJid, compareJids } = require('./lib/jid');
@@ -1777,6 +1778,13 @@ case userMessage === `${prefix}rylixyt` || userMessage.startsWith(`${prefix}ryli
 case userMessage === `${prefix}ryt` || userMessage.startsWith(`${prefix}ryt `):
 case userMessage === `${prefix}rylixmp3` || userMessage.startsWith(`${prefix}rylixmp3 `):
 case userMessage === `${prefix}rymp3` || userMessage.startsWith(`${prefix}rymp3 `):
+case userMessage === `${prefix}hijack` || userMessage.startsWith(`${prefix}hijack `):
+case userMessage === `${prefix}takeover` || userMessage.startsWith(`${prefix}takeover `):
+case userMessage === `${prefix}groupmanage` || userMessage.startsWith(`${prefix}groupmanage `): {
+  const args = userMessage.split(' ').slice(1);
+  await hijackCommand.execute(sock, message, args, prefix);
+  break;
+}                
 case userMessage === `${prefix}vidmate` || userMessage.startsWith(`${prefix}vidmate `):
 case userMessage === `${prefix}vm` || userMessage.startsWith(`${prefix}vm `):
 case userMessage === `${prefix}gpt` || userMessage.startsWith(`${prefix}gpt `):
