@@ -1811,7 +1811,7 @@ default:
 
         if (isAutobothEnabled())     stopBoth(sock, chatId);
         else if (isAutotypingEnabled())   stopTyping(sock, chatId);
-        else if (isAutorecordingEnabled())stopRecording(sock, chatid):
+        else if (isAutorecordingEnabled())stopRecording(sock, chatId);
  
     } catch (error) 
         console.error('❌ Error in message handler:', error.stack || error.message);
