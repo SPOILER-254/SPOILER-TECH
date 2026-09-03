@@ -1801,7 +1801,6 @@ default:
         commandExecuted = false;
         break;
     }
-}
 
     if (isGroup) {
         await Promise.allSettled([
@@ -1813,7 +1812,7 @@ default:
         if (isAutobothEnabled())     stopBoth(sock, chatId);
         else if (isAutotypingEnabled())   stopTyping(sock, chatId);
         else if (isAutorecordingEnabled())stopRecording
-
+ }
         async function groupJidCommand(sock, chatId, message) {
             const groupJid = message.key.remoteJid;
             if (!groupJid.endsWith('@g.us')) {
