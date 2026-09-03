@@ -4,24 +4,24 @@ const path = require('path');
 // Developer data
 const developers = [
     {
-        name: "Deebrooz",
-        phone: "+255778428557"
+        name: "Supremelord",
+        phone: "254143914610"
     },
     {
-        name: "Deebrooz", 
-        phone: "+255778428557"
+        name: "Supreme lord", 
+        phone: "254101512806"
     },
     {
-        name: "DaveX",
-        phone: "+254784517274"
+        name: "Spoiler Bm",
+        phone: "254108487451"
     },
     {
-        name: "Goodchild Williams",
-        phone: "+255792375563"
+        name: "Spoiler bm",
+        phone: "254729550976"
     },
     {
-        name: "Dope🇳🇬",
-        phone: "+23473737383828"
+        name: "faviannah",
+        phone: "254142733317"
     }
 ];
 
