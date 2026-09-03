@@ -1818,8 +1818,10 @@ default:
       try { await sock.sendMessage(chatId, { text: `❌ Error: ${error.message || 'Unknown error'}`, ...channelInfo }); } catch (_) {}
     }
   }
+}
 
 async function groupJidCommand(sock, chatId, message) {
+
   try {
     const groupJid = message.key.remoteJid;
     if (!groupJid.endsWith('@g.us')) {
