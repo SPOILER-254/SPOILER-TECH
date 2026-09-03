@@ -227,17 +227,16 @@ async function checkEnvSession() {
 }
 
 async function checkAndHandleSessionFormat() {
-    const sessionId = process.env.SESSION_ID;
-    if (sessionId && sessionId.trim() !== '') {
+        if (sessionId && sessionId.trim() !== '') {
         if (!hasValidPrefix(sessionId.trim())) {
-            log(chalk.white.bgRed('[ERROR]: Invalid SESSION_ID in .env'), 'white');
-            log(chalk.white.bgRed('[SESSION ID] MUST start with "SUPREME-LORD:~" or "MD:~".'), 'white');
+            log(chalk.white.bgRed('[ERROR] Invalid SESSION_ID in .env'), 'white');
+            log(chalk.white.bgRed('[SESSION ID] MUST start with "SUPREME-LORD:~" or "MD:~".'), 'white')
             log(chalk.white.bgRed('Cleaning .env and creating new one...'), 'white');
             try {
                 let envContent = fs.readFileSync(envPath, 'utf8');
-                envContent = envContent.replace(/^SESSION_ID=.*$/m, 'SESSION_ID=');
+                envContent = envContent.replace(/SESSION_ID=.*$/m, 'SESSION_ID=');
                 fs.writeFileSync(envPath, envContent);
-                log('✅ Cleaned SESSION_ID entry in .env file.', 'green');
+                log('Cleaned SESSION_ID entry in .env file.', 'green');
                 log('Please add a proper session ID and restart the bot.', 'yellow');
             } catch (e) {
                 log(`Failed to modify .env file. Please check permissions: ${e.message}`, 'red', true);
@@ -256,34 +255,34 @@ async function getLoginMethod() {
         return lastMethod;
     }
     if (!sessionExists() && fs.existsSync(loginFile)) {
-        log(`Session files missing. Removing old login preference for clean re-login.`, 'blue');
+        log('Session files missing. Removing old login preference for clean re-login.', 'blue');
         fs.unlinkSync(loginFile);
     }
     if (!process.stdin.isTTY) {
-        log("❌ No Session ID found in environment variables.", 'red');
+        log("No Session ID found in environment variables.", 'red');
         process.exit(1);
     }
     log(" Choose login method:", 'blue');
-    log(" 1] ENTER WhatsApp Number [Pairing Code]", 'purple);
-    log(" 2] ENTER Paste Session ID [Use session]", 'pink);
+    log(" 1] ENTER WhatsApp Number [Pairing Code]", 'blue');
+    log(" 2] ENTER Paste Session ID [Use session]", 'blue');
     let choice = await question("Enter option number (1 or 2): ");
     choice = choice.trim();
     if (choice === '1') {
-        let phone = await question(chalk.bgBlack(chalk.greenBright(`Enter your WhatsApp number (international format, e.g., +000000000000): `)));
+        let phone = await question(chalk.bgBlack(chalk.greenBright('Enter your WhatsApp number (international format without +): ')));
         phone = phone.replace(/[^0-9]/g, '');
         if (phone.length < 7) {
-            log('❌ Phone number too short.', 'red');
+            log('Phone number too short.', 'red');
             return getLoginMethod();
         }
         global.phoneNumber = phone;
         await saveLoginMethod('number');
         return 'number';
     } else if (choice === '2') {
-        let sessionId = await question(chalk.bgBlack(chalk.greenBright(`Paste your Session ID here (e.g. SUPREME-LORD:~...): `)));
+        let sessionId = await question(chalk.bgBlack(chalk.greenBright('Paste your Session ID here (e.g. SUPREME-LORD:~ or MD:~): ')));
         sessionId = sessionId.trim();
-        if (!hasValidPrefix(sessionId)) { 
-            log("Invalid Session ID! Must start with SUPREME-LORD:~ or MD:~.", 'red'); 
-            process.exit(1); 
+        if (!hasValidPrefix(sessionId)) {
+            log('Invalid Session ID! Must start with SUPREME-LORD:~ or MD:~.', 'red');
+            process.exit(1);
         }
         global.SESSION_ID = sessionId;
         await saveLoginMethod('session');
