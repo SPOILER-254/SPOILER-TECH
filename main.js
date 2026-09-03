@@ -1813,13 +1813,13 @@ default:
         else if (isAutotypingEnabled())   stopTyping(sock, chatId);
         else if (isAutorecordingEnabled())stopRecording(sock, chatId);
  
-    } catch (error) 
-        console.error('❌ Error in message handler:', error.stack || error.message);
-        if (chatId) {
-            try { await sock.sendMessage(chatId, { text: `❌ Error: ${error.message || 'Unknown error'}`, ...channelInfo }); } catch (_) {}
-        }
+    } catch (error) {
+      console.error('❌ Error in message handler:', error.stack || error.message);
+      if (chatId) {
+        try { await sock.sendMessage(chatId, { text: `❌ Error: ${error.message || 'Unknown error'}`, ...channelInfo }); } catch (_) {}
+      }
     }
-}
+    }
     async function groupJidCommand(sock, chatId, message) {
         try {
             const groupJid = message.key.remoteJid;
