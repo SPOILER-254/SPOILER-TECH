@@ -201,7 +201,7 @@ function sessionExists() {
     return fs.existsSync(credsPath);
 }
 
-const VALID_PREFIXES = ['BLACKLORD-X:~','MD:~'];
+const VALID_PREFIXES = ['SPOILER-X:~','MD:~'];
 
 function hasValidPrefix(id) {
     return VALID_PREFIXES.some(p => id.includes(p));
@@ -231,7 +231,7 @@ async function checkAndHandleSessionFormat() {
     if (sessionId && sessionId.trim() !== '') {
         if (!hasValidPrefix(sessionId.trim())) {
             log(chalk.white.bgRed('[ERROR]: Invalid SESSION_ID in .env'), 'white');
-            log(chalk.white.bgRed('[SESSION ID] MUST start with "BLACKLORD-X:~" or "MD:~".'), 'white');
+            log(chalk.white.bgRed('[SESSION ID] MUST start with "SPOILER-X:~" or "MD:~".'), 'white');
             log(chalk.white.bgRed('Cleaning .env and creating new one...'), 'white');
             try {
                 let envContent = fs.readFileSync(envPath, 'utf8');
@@ -279,10 +279,10 @@ async function getLoginMethod() {
         await saveLoginMethod('number');
         return 'number';
     } else if (choice === '2') {
-        let sessionId = await question(chalk.bgBlack(chalk.greenBright(`Paste your Session ID here (e.g. BLACKLORD-X:~...): `)));
+        let sessionId = await question(chalk.bgBlack(chalk.greenBright(`Paste your Session ID here (e.g. SPOILER-X:~...): `)));
         sessionId = sessionId.trim();
         if (!hasValidPrefix(sessionId)) { 
-            log("Invalid Session ID! Must start with BLACKLORD-X:~ or MD:~.", 'red'); 
+            log("Invalid Session ID! Must start with SPOILER:~ or MD:~.", 'red'); 
             process.exit(1); 
         }
         global.SESSION_ID = sessionId;
@@ -335,7 +335,7 @@ async function sendWelcomeMessage(XeonBotInc) {
     const detectPlatform = () => {
         if (process.env.DYNO) return "Heroku";
         if (process.env.RENDER) return "Render";
-        if (process.env.PORTS && process.env.ADEVOS_HOST_ID) return "ADEVOS X Platform"; // keep as is for platform detection
+        if (process.env.PORTS && process.env.SPOILER_HOST_ID) return "SPOILER X Platform"; // keep as is for platform detection
         if (process.env.P_SERVER_UUID) return "Panel";
         if (process.env.LXC) return "Linux Container (LXC)";
         switch (os.platform()) {
