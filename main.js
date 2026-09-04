@@ -92,9 +92,8 @@ function getCachedModeData() {
     return _cache.modeData;
 }
 
-/*━━━━━━━━━━━━━━━━━━━━*/
-// -----Command imports - Handlers-----
-/*━━━━━━━━━━━━━━━━━━━━*/
+const { startAutoGreet } = require('./lib/autoGreet');
+// ------Command imports - Handlers------
 const { autotypingCommand, isAutotypingEnabled, sendTyping, stopTyping } = require('./commands/autotyping');
 const { autorecordingCommand, isAutorecordingEnabled, sendRecording, stopRecording } = require('./commands/autorecording');
 const { autobothCommand, isAutobothEnabled, sendBothStart, sendBothBackground, stopBoth } = require('./commands/autoboth');
