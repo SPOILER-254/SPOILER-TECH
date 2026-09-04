@@ -29,10 +29,12 @@ Spoiler Tech - WhatsApp bot framework | Leaks | Tools
 </a>
 
 <br>
-![Github pairing](https://https://spoiler.pairsite.space=for-the-badge&colour=red)
+
 ![GitHub stars](https://img.shields.io/github/stars/spoiler-254/spoiler-tech?style=for-the-badge&color=darkgreen)
 ![GitHub forks](https://img.shields.io/github/forks/spoiler-254/spoiler-tech?style=for-the-badge&color=darkgreen)
 ![GitHub repo size](https://img.shields.io/github/repo-size/spoiler-254/spoiler-tech?style=for-the-badge&color=darkgreen)
+
+https://spoiler.pairsite.space
 
 </div>
 Powered by 𝕾𝖚𝖕𝖗𝖊𝖒𝖊
