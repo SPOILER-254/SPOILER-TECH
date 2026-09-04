@@ -325,8 +325,8 @@ const pendingCommand = require('./commands/pending');
 /*━━━━━━━━━━━━━━━━━━━━*/
 // Global settings
 /*━━━━━━━━━━━━━━━━━━━━*/
-global.packname = settings?.packname || "ADEVOS X";
-global.author = settings?.author || "𝐁𝐋𝐀𝐂𝐊𝐋𝐎𝐑𝐃-𝐗 ";
+global.packname = settings?.packname || "SPOILER-X";
+global.author = settings?.author || "SPOILER-𝐗 ";
 global.channelLink = "https://whatsapp.com/channel/0029Vb6wIVU9Bb5w69FQvt0W";
 global.ytchanel = "";
 
