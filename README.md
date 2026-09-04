@@ -4,6 +4,10 @@
 
 <h1 align="center">𝐒𝐏𝐎𝐈𝐋𝐄𝐑 𝐓𝐄𝐂𝐇</h1>
 <h3 align="center">supreme lord</h3>
+<div align="center">
+  
+  <img src="https://readme-typing-svg.demolab.com/?lines=The+bot+supports+deployment;On+all+free+panels+easily" alt="Typing SVG" />
+</div>
 
 <p align="center">
   <a href="https://whatsapp.com/channel/0029VbChWLcCRs1nIoOoyk2T  "><img src="https://img.shields.io/badge/Channel-Follow-red?style=for-the-badge&logo=whatsapp" /></a>
