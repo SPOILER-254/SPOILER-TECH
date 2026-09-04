@@ -1,5 +1,5 @@
 {
-  "name": "spoiler-tech ",
+  "name": "spoiler-tech",
   "version": "2.0.0",
   "description": "WhatsApp Bot",
   "main": "index.js",
@@ -12,12 +12,9 @@
     "start:fresh": "npm run reset-session && npm start",
     "install:panel": "npm install --legacy-peer-deps",
     "install:force": "npm install --force",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "docker:build": "docker build -t docker run -e SESSION_ID=$SESSION_ID BROOZ-D BOT"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "whatsapp-bot"
-  ],
+  "keywords": ["whatsapp-bot"],
   "author": "spoiler",
   "license": "ISC",
   "dependencies": {
@@ -25,7 +22,7 @@
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@hapi/boom": "^10.0.1",
     "@types/node": "^20.0.0",
-    "@whiskeysockets/baileys": "^v7.0.0-rc.9",
+    "@whiskeysockets/baileys": "^7.0.0-rc.9",
     "adm-zip": "^0.5.16",
     "awesome-phonenumber": "^5.9.0",
     "axios": "^1.8.4",
@@ -33,7 +30,7 @@
     "cheerio": "^1.0.0-rc.12",
     "cookie": "^0.5.0",
     "crypto": "^1.0.1",
-    "dotenv": "*",
+    "dotenv": "^16.4.5",
     "events": "^3.3.0",
     "express": "^4.19.2",
     "ffmpeg-static": "^5.3.0",
