@@ -358,7 +358,7 @@ async function sendWelcomeMessage(XeonBotInc) {
         const prefix = getPrefix() || '.';
 
         await XeonBotInc.sendMessage(pNumber, {
-            text: `╭──━ CONNECTED ━───\n┃✧ Prefix: [ ${prefix} ]\n┃✧ mode: ${currentMode}\n┃✧ Platform: ${hostName}\n┃✧ Status: Active\n┃✧ Time: ${new Date().toLocaleString()}\n┃✧ Dev: BLACKLORD \n┃✧ Bot: SPOILER-TECH\n╰─────━━━━───────`
+            text: `╭──━ CONNECTED ━───\n┃✧ Prefix: [ ${prefix} ]\n┃✧ mode: ${currentMode}\n┃✧ Platform: ${hostName}\n┃✧ Status: Active\n┃✧ Time: ${new Date().toLocaleString()}\n┃✧ Dev: SPOILER/SUPREME \n┃✧ Bot: SPOILER-TECH\n╰─────━━━━───────`
         });
         log('[ BOT ] successfully connected.', 'blue');
         
