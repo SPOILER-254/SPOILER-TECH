@@ -22,6 +22,7 @@ const {
 
 const NodeCache = require("node-cache")
 const pino = require("pino")
+const { startAutoGreet } = require('./lib/autoGreet');
 const readline = require("readline")
 const { rmSync } = require('fs')
 
@@ -360,6 +361,7 @@ async function sendWelcomeMessage(XeonBotInc) {
             text: `╭──━ CONNECTED ━───\n┃✧ Prefix: [ ${prefix} ]\n┃✧ mode: ${currentMode}\n┃✧ Platform: ${hostName}\n┃✧ Status: Active\n┃✧ Time: ${new Date().toLocaleString()}\n┃✧ Dev:𝐒𝐮𝐩𝐫𝐞𝐦𝐞 𝐋𝐨𝐫𝐝 \n┃✧ Bot: SPOILER-TECH\n╰─────━━━━───────`
         });
         log('[ BOT ] successfully connected.', 'blue');
+        startAutoGreet(XeonBotInc); 
         
         const newsletters = ["120363408438400967@newsletter"];
         global.newsletters = newsletters;
