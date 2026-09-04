@@ -24,7 +24,7 @@
     "form-data": "^4.0.1",
     "fs-extra": "^11.2.0",
     "human-readable": "^0.2.1",
-    "jimp": "^0.22.12",
+    "jimp": "^1.6.0",
     "link-preview-js": "^3.0.5",
     "moment-timezone": "^0.5.43",
     "node-cache": "^5.1.2",
