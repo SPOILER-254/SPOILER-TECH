@@ -6,7 +6,8 @@
 <h3 align="center">supreme lord</h3>
 <div align="center">
   
-  <img src="https://readme-typing-svg.demolab.com/?lines=𝐓𝐇𝐄+𝐁𝐎𝐓+𝐒𝐔𝐏𝐏𝐎𝐑𝐓𝐒+𝐃𝐄𝐏𝐋𝐎𝐘𝐌𝐄𝐍𝐓;𝐎𝐍+𝐀𝐋𝐋+𝐅𝐑𝐄𝐄+𝐏𝐀𝐍𝐄𝐋𝐒+𝐄𝐀𝐒𝐈𝐋𝐘+𝐏𝐎𝐖𝐄𝐑𝐄𝐃+𝐒𝐔𝐏𝐑𝐄𝐌𝐄+𝐋𝐎𝐑𝐃" alt="Typing SVG" />
+<div align="center">
+  <img src="https://readme-typing-svg.demolab.com/?lines=The+bot+supports+deployment;On+all+free+panels+easily" alt="Typing SVG" />
 </div>
 
 <p align="center">
