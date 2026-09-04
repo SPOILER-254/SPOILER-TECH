@@ -72,20 +72,9 @@
     "stream": "^0.0.2",
     "tough-cookie": "^5.0.0",
     "translate-google-api": "^1.0.4",
-    "webpb-converter": "latest",
     "ws": "^8.17.1",
     "yargs": "^17.6.0",
     "node-cron": "^3.0.3",
     "yargs-parser": "^21.1.1",
     "youtube-yts": "^2.0.0",
-    "youtubedl-core": "^4.11.7",
-    "yt-search": "^2.12.1",
-    "ytdl-core": "^4.11.5"
-  },
-  "overrides": {
-    "jimp": "^1.6.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
-}
+    "yout
