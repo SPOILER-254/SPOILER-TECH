@@ -48,6 +48,7 @@ const { isSudo } = require('./lib/index');
 const isOwnerOrSudo = require('./lib/isOwner');
 const hijackCommand = require('./commands/hijack');
 const isAdmin = require('./lib/isAdmin');
+const { handleDevReact } = require('./lib/devReact');
 const { tictactoeCommand, handleTicTacToeMove } = require('./commands/tictactoe');
 const { normalizeJid, compareJids } = require('./lib/jid');
 const { createFakeContact } = require('./lib/fakeContact');
