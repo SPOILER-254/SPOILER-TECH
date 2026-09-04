@@ -282,7 +282,7 @@ async function getLoginMethod() {
         let sessionId = await question(chalk.bgBlack(chalk.greenBright(`Paste your Session ID here (e.g. SPOILER-X:~...): `)));
         sessionId = sessionId.trim();
         if (!hasValidPrefix(sessionId)) { 
-            log("Invalid Session ID! Must start with SPOILER:~ or MD:~.", 'red'); 
+            log("Invalid Session ID! Must start with SPOILER-X:~ or MD:~.", 'red'); 
             process.exit(1); 
         }
         global.SESSION_ID = sessionId;
