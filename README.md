@@ -30,7 +30,7 @@ Spoiler Tech - WhatsApp bot framework | Leaks | Tools
 
 | Platform | Button |
 |----------|--------|
-| **Heroku** | <a href="https://dashboard.heroku.com/new?template=https://github.com/SPOILER-254/SPOILER-TECH/edit/main/README.md  "><img src="https://img.shields.io/badge/HerokuHosting-6762A6?style=for-the-badge&logo=heroku&logoColor=white&logoSize=auto"/></a> |
+| **Heroku** | <a href="https://heroku.com/deploy?template=https://github.com/SPOILER-254/SPOILER-TECH"><img src="https://img.shields.io/badge/HerokuHosting-6762A6?style=for-the-badge&logo=heroku&logoColor=white&logoSize=auto"/></a> |
 | **Railway** | <a href="https://railway.app/new"><img src="https://img.shields.io/badge/Railway-000000?style=for-the-badge&logo=railway&logoColor=white&logoSize=auto"/></a> |
 | **Render** | <a href="https://render.com"><img src="https://img.shields.io/badge/Render-0099ff?style=for-the-badge&logo=render&logoColor=white&logoSize=auto"/></a> |
 
