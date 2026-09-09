@@ -1,0 +1,27 @@
+{
+  "name": "Spoiler Tech",
+  "description": "Deployment configuration for SPOILER-TECH",
+  "repository": "https://github.com/SPOILER-254/SPOILER-TECH",
+  "keywords": [
+    "bot",
+    "nodejs",
+    "javascript"
+  ],
+  "image": "heroku/nodejs",
+  "env": {
+    "PREFIX": {
+      "description": "Your command prefix",
+      "required": false,
+      "value": "."
+    },
+    "SESSION_ID": {
+      "description": "Your session or auth ID",
+      "required": false
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}
