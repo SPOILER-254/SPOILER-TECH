@@ -1,32 +1,50 @@
-require('dotenv').config();
-
-
-global.APIs = {
-    xteam: 'https://api.xteam.xyz',
-    dzx: 'https://api.dhamzxploit.my.id',
-    lol: 'https://api.lolhuman.xyz',
-    violetics: 'https://violetics.pw',
-    neoxr: 'https://api.neoxr.my.id',
-    zenzapis: 'https://zenzapis.xyz',
-    akuari: 'https://api.akuari.my.id',
-    akuari2: 'https://apimu.my.id',
-    nrtm: 'https://fg-nrtm.ddns.net',
-    bg: 'http://bochil.ddns.net',
-    fgmods: 'https://api-fgmods.ddns.net'
-};
-
-global.APIKeys = {
-    'https://api.xteam.xyz': 'd90a9e986e18778b',
-    'https://api.lolhuman.xyz': '85faf717d0545d14074659ad',
-    'https://api.neoxr.my.id': 'yourkey',
-    'https://violetics.pw': 'beta',
-    'https://zenzapis.xyz': 'yourkey',
-    'https://api-fgmods.ddns.net': 'fg-dylux'
-};
+// commands/update.js or plugins/update.js
+const config = require('../config');
+const axios = require('axios');
+const unzipper = require('unzipper');
 
 module.exports = {
-    SESSION_ID: global.SESSION_ID || process.env.SESSION_ID,
-    WARN_COUNT: 3,
-    APIs: global.APIs,
-    APIKeys: global.APIKeys
+  name: 'update',
+  alias: ['up'],
+  category: 'owner',
+  async execute(conn, m) {
+    // 1. Read the ZIP URL directly from config.js or environment variables
+    const zipUrl = config.UPDATE_ZIP_URL || process.env.UPDATE_ZIP_URL;
+
+    // 2. Check if URL exists before continuing
+    if (!zipUrl) {
+      return await conn.sendMessage(
+        m.key.remoteJid,
+        { text: '❌ Failed: No ZIP URL configured' },
+        { quoted: m }
+      );
+    }
+
+    try {
+      await conn.sendMessage(
+        m.key.remoteJid,
+        { text: '🔄 Fetching latest code update...' },
+        { quoted: m }
+      );
+
+      // 3. Stream and extract the ZIP contents to the current folder
+      const response = await axios({ url: zipUrl, responseType: 'stream' });
+      response.data.pipe(unzipper.Extract({ path: './' }));
+
+      await conn.sendMessage(
+        m.key.remoteJid,
+        { text: '✅ Update complete! Restarting bot...' },
+        { quoted: m }
+      );
+
+      // 4. Terminate process so PM2 / host container automatically restarts with new code
+      process.exit(0);
+    } catch (error) {
+      await conn.sendMessage(
+        m.key.remoteJid,
+        { text: `❌ Update failed: ${error.message}` },
+        { quoted: m }
+      );
+    }
+  }
 };
