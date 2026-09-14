@@ -20,7 +20,7 @@
 ### ⚡ About
 Spoiler Tech - WhatsApp bot framework | Leaks | Tools
 
-> Owner: supreme lord
+> Owner: spoiler
 
 **DOWNLOAD ZIP**
 <br>
