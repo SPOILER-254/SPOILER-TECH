@@ -3,7 +3,7 @@
 </p>
 
 <h1 align="center">𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇</h1>
-<h3 align="center">supreme lord</h3>
+<h3 align="center">supreme </h3>
 <div align="center">
   
 <div align="center">
@@ -47,4 +47,4 @@ Spoiler Tech - WhatsApp bot framework | Leaks | Tools
 https://spoiler.pairsite.space
 
 </div>
-Powered by 𝕾𝖚𝖕𝖗𝖊𝖒𝖊
+Powered by spoiler
