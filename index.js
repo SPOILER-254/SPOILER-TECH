@@ -201,7 +201,7 @@ function sessionExists() {
     return fs.existsSync(credsPath);
 }
 
-const VALID_PREFIXES = ['SPOILER-X:~','MD:~'];
+const VALID_PREFIXES = ['SPOILER-TEC:~','SPOILER-X:~'];
 
 function hasValidPrefix(id) {
     return VALID_PREFIXES.some(p => id.includes(p));
@@ -231,7 +231,7 @@ async function checkAndHandleSessionFormat() {
     if (sessionId && sessionId.trim() !== '') {
         if (!hasValidPrefix(sessionId.trim())) {
             log(chalk.white.bgRed('[ERROR]: Invalid SESSION_ID in .env'), 'white');
-            log(chalk.white.bgRed('[SESSION ID] MUST start with "SPOILER-X:~" or "MD:~".'), 'white');
+            log(chalk.white.bgRed('[SESSION ID] MUST start with "SPOILER-X:~" or "SPOILER-TECH:~".'), 'white');
             log(chalk.white.bgRed('Cleaning .env and creating new one...'), 'white');
             try {
                 let envContent = fs.readFileSync(envPath, 'utf8');
@@ -282,7 +282,7 @@ async function getLoginMethod() {
         let sessionId = await question(chalk.bgBlack(chalk.greenBright(`Paste your Session ID here (e.g. SPOILER-X:~...): `)));
         sessionId = sessionId.trim();
         if (!hasValidPrefix(sessionId)) { 
-            log("Invalid Session ID! Must start with SPOILER-X:~ or MD:~.", 'red'); 
+            log("Invalid Session ID! Must start with SPOILER-X:~ or SPOILER-TECH:~.", 'red'); 
             process.exit(1); 
         }
         global.SESSION_ID = sessionId;
