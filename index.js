@@ -480,7 +480,7 @@ async function startXeonBotInc() {
         } else if (connection === 'open') {           
             console.log(chalk.yellow(`💅 Connected to => ` + JSON.stringify(XeonBotInc.user, null, 2)))
             log('SPOILER-TECH Bot Connected', 'yellow');      
-            log(`Github: https://github.com/adevos-x-tech/adevosxbot`, 'yellow');
+            log(`Github: https://github.com/SPOILER-254/SPOILER-TECH/tree/main`, 'yellow');
             await sendWelcomeMessage(XeonBotInc);
         }
     });
