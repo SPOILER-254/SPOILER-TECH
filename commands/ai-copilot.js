@@ -55,7 +55,7 @@ async function copilotCommand(sock, chatId, message) {
         const aiResponse = apiData.result.trim();
         
         await sock.sendMessage(chatId, {
-            text: `*Copilot AI Assistant*\n\n*Question:* ${query}\n\n💬 *Response:* ${aiResponse}\n\n> *Powered by Adevos-X Tech*`
+            text: `*Copilot AI Assistant*\n\n*Question:* ${query}\n\n💬 *Response:* ${aiResponse}\n\n> *Powered by Spoiler-Tech*`
         }, { quoted: createFakeContact(message) });
 
     } catch (error) {
