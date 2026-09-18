@@ -1,0 +1,48 @@
+{
+  "name": "SPOILER-TECH",
+  "description": "WhatsApp Multi-Device Bot created by SPOILER-254",
+  "repository": "https://github.com/SPOILER-254/SPOILER-TECH",
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "multi-device",
+    "spoiler-tech"
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "SESSION_ID": {
+      "description": "Enter your WhatsApp Session ID",
+      "required": true
+    },
+    "OWNER_NUMBER": {
+      "description": "Enter owner phone number with country code (e.g., 254700000000)",
+      "required": true
+    },
+    "PREFIX": {
+      "description": "Bot command prefix",
+      "value": ".",
+      "required": false
+    },
+    "MODE": {
+      "description": "Bot mode (public or private)",
+      "value": "public",
+      "required": false
+    },
+    "BOT_NAME": {
+      "description": "Bot Display Name",
+      "value": "SPOILER-TECH",
+      "required": false
+    }
+  },
+  "formation": {
+    "worker": {
+      "quantity": 1,
+      "size": "eco"
+    }
+  }
+}
+
