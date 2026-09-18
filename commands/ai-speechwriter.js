@@ -61,7 +61,7 @@ async function speechwriterCommand(sock, chatId, message) {
         const speech = apiData.result.data.data.speech.trim();
         
         await sock.sendMessage(chatId, {
-            text: `*Speech Writer Assistant*\n\n*Topic:* ${topic}\n\n*Generated Speech:*\n\n${speech}\n\n━━━━━━━━━━━━━━━━━━━━\n*Details:*\n• Length: ${length}\n• Type: ${type}\n• Tone: ${tone}\n\n> *Powered by Adevos-X Tech*`
+            text: `*Speech Writer Assistant*\n\n*Topic:* ${topic}\n\n*Generated Speech:*\n\n${speech}\n\n━━━━━━━━━━━━━━━━━━━━\n*Details:*\n• Length: ${length}\n• Type: ${type}\n• Tone: ${tone}\n\n> *Powered by Spoiler-Tech*`
         }, { quoted: createFakeContact(message) });
 
         // Send final reaction
