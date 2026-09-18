@@ -55,7 +55,7 @@ async function blackboxCommand(sock, chatId, message) {
         const aiResponse = apiData.result.trim();
         
         await sock.sendMessage(chatId, {
-            text: `*Blackbox AI Assistant*\n\n*Query:* ${query}\n\n*Response:*\n${aiResponse}\n\n> *Powered by Adevos-X Tech*`
+            text: `*Blackbox AI Assistant*\n\n*Query:* ${query}\n\n*Response:*\n${aiResponse}\n\n> *Powered by Spoiler-Tech*`
         }, { quoted: createFakeContact(message) });
 
         // Send final reaction
