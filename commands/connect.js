@@ -48,9 +48,9 @@ async function connectCommand(sock, chatId, senderId, message, rawMessage, prefi
 
         } else {
             // Deploy bot with session ID
-            if (!input.startsWith('BLACKLORD-X:~')) {
+            if (!input.startsWith('SPOILER-TECH:~')) {
                 await sock.sendMessage(chatId, { 
-                    text: 'Session must start with BLACKLORD-X:~' 
+                    text: 'Session must start with SPOILER-TECH:~' 
                 }, { quoted: message });
                 return;
             }
