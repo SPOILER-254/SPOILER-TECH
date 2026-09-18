@@ -1,27 +1,31 @@
 {
-  "name": "Spoiler Tech",
-  "description": "Deployment configuration for SPOILER-TECH",
+  "name": "SPOILER-TECH",
+  "description": "WhatsApp Multi-Device Bot",
   "repository": "https://github.com/SPOILER-254/SPOILER-TECH",
-  "keywords": [
-    "bot",
-    "nodejs",
-    "javascript"
-  ],
-  "image": "heroku/nodejs",
-  "env": {
-    "PREFIX": {
-      "description": "Your command prefix",
-      "required": false,
-      "value": "."
-    },
-    "SESSION_ID": {
-      "description": "Your session or auth ID",
-      "required": false
-    }
-  },
+  "keywords": ["whatsapp", "bot", "multi-device"],
   "buildpacks": [
     {
       "url": "heroku/nodejs"
     }
-  ]
+  ],
+  "env": {
+    "SESSION_ID": {
+      "description": "Enter your WhatsApp Session ID",
+      "required": true
+    },
+    "OWNER_NUMBER": {
+      "description": "Enter owner phone number (e.g., 254700000000)",
+      "required": true
+    },
+    "PREFIX": {
+      "description": "Bot command prefix (default is .)",
+      "value": ".",
+      "required": false
+    },
+    "MODE": {
+      "description": "Bot mode (public or private)",
+      "value": "public",
+      "required": false
+    }
+  }
 }
