@@ -56,7 +56,7 @@ async function gpt4Command(sock, chatId, message) {
 
         // Format and send response
         await sock.sendMessage(chatId, {
-            text: `🤖 *AI Response*\n\n💬 ${aiResponse}\n\n━━━━━━━━━━━━━━━━━━━\n📡 *Model:* ${apiData.result?.model || 'Llama 3.3 70B'}\n⚡ *Powered by:* Adevos-X Tech`
+            text: `🤖 *AI Response*\n\n💬 ${aiResponse}\n\n━━━━━━━━━━━━━━━━━━━\n📡 *Model:* ${apiData.result?.model || 'Llama 3.3 70B'}\n⚡ *Powered by:* Spoiler-Tech`
         }, { quoted: createFakeContact(message) });
 
     } catch (error) {
