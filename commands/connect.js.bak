@@ -48,12 +48,12 @@ async function connectCommand(sock, chatId, senderId, message, rawMessage, prefi
 
         } else {
             // Deploy bot with session ID
-            if (!input.startsWith('ADEVOS-X:~')) {
+            if (!input.startsWith('SPOILER-TECH:~')) {
                 await sock.sendMessage(chatId, { 
-                    text: 'Session must start with ADEVOS-X:~' 
+                    text: 'Session must start with SPOILER-TECH:~' 
                 }, { quoted: message });
                 return;
-            }
+            
 
             await sock.sendMessage(chatId, { 
                 text: 'Deploying bot to your account...' 
