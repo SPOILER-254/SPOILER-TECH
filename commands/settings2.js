@@ -1,18 +1,18 @@
-const { gmd } = require("../black_hat/gmdCmds");
+const { gmd } = require("../spoiler-tech/gmdCmds");
 const { getSetting, setSetting } = require("../black_hat/database/settings");
 const {
   getGroupSetting,
   setGroupSetting,
   resetAllGroupSettings,
   getAllGroupSettings,
-} = require("../black_hat/database/groupSettings");
+} = require("../spoiler-tech/database/groupSettings");
 const { clearAllSudo, getSudoNumbers } = require("../black_hat/database/sudo");
 const {
   getAllUsersNotes,
   deleteNoteById,
   updateNoteById,
   deleteAllNotes,
-} = require("../black_hat/database/notes");
+} = require("../spoiler-tech/database/notes");
 
 function parseBooleanInput(input) {
   if (!input) return null;
