@@ -1,5 +1,5 @@
-const { gmd, getGroupMetadata, getLidMapping } = require("../black_hat");
-const { getGroupSetting, setGroupSetting } = require("../black_hat/database/groupSettings");
+const { gmd, getGroupMetadata, getLidMapping } = require("../spoiler-tech");
+const { getGroupSetting, setGroupSetting } = require("../spoiler-tech/database/groupSettings");
 
 gmd(
   {
