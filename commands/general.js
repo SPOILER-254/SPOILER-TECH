@@ -1,4 +1,4 @@
-const { gmd, commands, monospace, formatBytes } = require("../black_hat"),
+const { gmd, commands, monospace, formatBytes } = require("../spoiler-tech"),
   fs = require("fs"),
   axios = require("axios"),
   BOT_START_TIME = Date.now(),
