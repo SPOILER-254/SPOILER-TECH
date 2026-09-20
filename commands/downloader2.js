@@ -4,7 +4,7 @@ const {
         getFileSize,
         getMimeCategory,
         getMimeFromUrl,
-    } = require("../black_hat"),
+    } = require("../spoiler-tech"),
     GIFTED_DLS = require("gifted-dls"),
     giftedDls = new GIFTED_DLS(),
     axios = require("axios"),
