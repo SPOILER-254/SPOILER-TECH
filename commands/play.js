@@ -1,4 +1,4 @@
-const { gmd, toPtt } = require("../black_hat");
+const { gmd, toPtt } = require("../spoiler-tech");
 const yts = require("yt-search");
 const axios = require("axios");
 
