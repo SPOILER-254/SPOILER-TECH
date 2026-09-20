@@ -1,4 +1,4 @@
-const { gmd } = require("../black_hat"),
+const { gmd } = require("../spoiler-tech"),
   axios = require("axios"),
   {
     generateWAMessageContent,
