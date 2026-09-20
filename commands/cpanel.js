@@ -5,12 +5,12 @@ const {
   gmd,
   commands,
   monospace,
-} = require("../black_hat");
+} = require("../spoiler-tech");
 
 const { sendButtons } = require("gifted-btns");
 
 /* ============================================================
- * 🖥️ BLACK HAT — PTERODACTYL CPANEL SYSTEM
+ * 🖥️ SPOILER TECH — PTERODACTYL CPANEL SYSTEM
  * ============================================================
  *
  * ENV:
