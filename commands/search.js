@@ -1,4 +1,4 @@
-const { gmd, gmdSticker } = require("../black_hat"),
+const { gmd, gmdSticker } = require("../spoiler-tech"),
   fs = require("fs").promises,
   fss = require("fs"),
   os = require("os"),
