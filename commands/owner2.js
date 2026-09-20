@@ -1,4 +1,4 @@
-const { gmd, commands, getSetting } = require("../spoiler-tech");
+const { gmd, commands, getSetting } = require("spoiler-tech");
 const { downloadContentFromMessage } = require("gifted-baileys");
 const FormData = require("form-data");
 const { Blob } = require("buffer");
@@ -13,7 +13,7 @@ const {
   groupCache,
   getGroupMetadata,
   cachedGroupMetadata,
-} = require("../spoiler-tech/connection/groupCache");
+} = require("spoiler-tech/connection/groupCache");
 
 const { exec: _shellExec } = require("child_process");
 
