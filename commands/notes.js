@@ -1,4 +1,4 @@
-const { gmd } = require("../black_hat");
+const { gmd } = require("../spoiler-tech");
 const {
     initNotesDB,
     addNote,
@@ -7,8 +7,8 @@ const {
     updateNote,
     deleteNote,
     deleteAllNotes,
-} = require("../black_hat/database/notes");
-const { getContextInfo } = require("../black_hat/contextInfo");
+} = require("../spoiler-tech/database/notes");
+const { getContextInfo } = require("../spoiler-tech/contextInfo");
 
 initNotesDB();
 
