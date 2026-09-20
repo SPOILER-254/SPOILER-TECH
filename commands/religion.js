@@ -1,4 +1,4 @@
-const { gmd } = require("../black_hat");
+const { gmd } = require("../spoiler-tech");
 const axios = require("axios");
 const { sendButtons } = require("gifted-btns");
 
