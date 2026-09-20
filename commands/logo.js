@@ -1,4 +1,4 @@
-const { gmd, gmdBuffer } = require("../black_hat");
+const { gmd, gmdBuffer } = require("../spoiler-tech");
 const axios = require("axios");
 
 const logoEndpoints = [
@@ -10,19 +10,19 @@ const logoEndpoints = [
   },
     {
     pattern: "angelWing",
-    aliases: ["angelWing", "blackhat6"],
+    aliases: ["angelWing", "spoiler6"],
     description: "angelWing Silver logo",
     endpoint: "angelWing",
   },
     {
     pattern: "facebookTypo",
-    aliases: ["facebookTypo", "blackhat5"],
+    aliases: ["facebookTypo", "spoiler5"],
     description: "facebookTypo Silver logo",
     endpoint: "facebookTypo",
   },
     {
     pattern: "hollywoodStar",
-    aliases: ["hollywoodStar", "blackhat4"],
+    aliases: ["hollywoodStar", "spoiler4"],
     description: "hollywoodStar Silver logo",
     endpoint: "hollywoodStar",
   },
@@ -34,19 +34,19 @@ const logoEndpoints = [
   },
     {
     pattern: "fireworks",
-    aliases: ["fireworks", "blackhat3"],
+    aliases: ["fireworks", "spoiler3"],
     description: "fireworks Silver logo",
     endpoint: "fireworks",
   },
     {
     pattern: "fpsGamingLogo",
-    aliases: ["fpsGamingLogo", "blackhat2"],
+    aliases: ["fpsGamingLogo", "spoiler2"],
     description: "fpsGamingLogo Silver logo",
     endpoint: "fpsGamingLogo",
   },
           {
     pattern: "assassinLogo",
-    aliases: ["assassinLogo", "blackhat1"],
+    aliases: ["assassinLogo", "spoiler1"],
     description: "assassinLogo Style logo",
     endpoint: "assassinLogo",
   },
