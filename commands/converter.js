@@ -1,4 +1,4 @@
-const { gmd, toAudio, toVideo, toPtt, stickerToImage, gmdFancy, gmdRandom, getSetting, runFFmpeg, getVideoDuration, gmdSticker } = require("../black_hat");
+const { gmd, toAudio, toVideo, toPtt, stickerToImage, gmdFancy, gmdRandom, getSetting, runFFmpeg, getVideoDuration, gmdSticker } = require("../spoiler-tech");
 const fs = require("fs").promises;
 const { StickerTypes } = require("wa-sticker-formatter");
 
