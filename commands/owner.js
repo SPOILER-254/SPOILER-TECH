@@ -1,4 +1,4 @@
-const { gmd, commands, getSetting } = require("spoiler-tech");
+const { gmd, commands, getSetting } = require("../spoiler-tech");
 const fs = require("fs").promises;
 const fsA = require("node:fs");
 const { S_WHATSAPP_NET } = require("gifted-baileys");
@@ -9,7 +9,7 @@ const {
   groupCache,
   getGroupMetadata,
   cachedGroupMetadata,
-} = require("spoiler-tech/connection/groupCache");
+} = require("../spoiler-tech/connection/groupCache");
 
 
 gmd(
