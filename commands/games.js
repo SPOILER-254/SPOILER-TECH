@@ -1,4 +1,4 @@
-const { gmd } = require("../black_hat");
+const { gmd } = require("../spoiler-tech");
 const {
     createGame,
     joinGame,
@@ -7,7 +7,7 @@ const {
     makeMove,
     endGame,
     initGamesDB,
-} = require("../black_hat/database/games");
+} = require("../spoiler-tech/database/games");
 
 const {
     createWcgGame,
@@ -19,7 +19,7 @@ const {
     eliminatePlayer,
     endWcgGame,
     initWcgDB,
-} = require("../black_hat/database/wcgGame");
+} = require("../spoiler-tech/database/wcgGame");
 
 const {
     createDiceGame,
@@ -29,7 +29,7 @@ const {
     playerRoll,
     endDiceGame,
     initDiceDB,
-} = require("../black_hat/database/diceGame");
+} = require("../spoiler-tech/database/diceGame");
 
 const { 
     clearGameTimeout, 
@@ -44,7 +44,7 @@ const {
     handleAiDiceRoll,
     gameTimeouts,
     diceTimeouts,
-} = require("../black_hat/gameHandler");
+} = require("../spoiler-tech/gameHandler");
 
 const {
     wcgTimeouts,
@@ -53,7 +53,7 @@ const {
     setWcgJoinTimeout,
     formatScores,
     getDiceEmoji,
-} = require("../black_hat/wcg");
+} = require("../spoiler-tech/wcg");
 
 
 const {
@@ -61,7 +61,7 @@ const {
     rollDice: aiRollDice,
     findBestTttMove,
     BOT_JID,
-} = require("../black_hat/gameAI");
+} = require("../spoiler-tech/gameAI");
 
 initGamesDB();
 initWcgDB();
