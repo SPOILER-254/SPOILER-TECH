@@ -1,4 +1,4 @@
-const { gmd } = require("../black_hat");
+const { gmd } = require("../spoiler-tech");
 const axios = require("axios");
 
 async function queryAI(endpoint, query, conText) {
@@ -27,7 +27,7 @@ gmd(
   {
     pattern: "blackhatai",
     aliases: ["ai"],
-    description: "Chat with blackhatai AI assistant",
+    description: "Chat with spoilertechai AI assistant",
     category: "Ai",
     filename: __filename,
   },
