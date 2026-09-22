@@ -217,7 +217,7 @@ function generateMenu(pushname, currentMode, hostName, ping, uptimeFormatted) {
         idx++;
         menu += idx % 3 === 0 ? `${readmore}\n` : `\n`;
     }
-    menu += `> Powered By Adevos-X Tech\n`;
+    menu += `> Powered By SPOILER-TECH\n`;
     return menu;
 }
 
