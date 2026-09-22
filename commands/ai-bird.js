@@ -55,7 +55,7 @@ async function bardCommand(sock, chatId, message) {
         const aiResponse = apiData.result.trim();
         
         await sock.sendMessage(chatId, {
-            text: `*Google Bard AI Assistant*\n\n*Query:* ${query}\n\n*Response:*\n${aiResponse}\n\n> *Powered by Adevos-X Tech*`
+            text: `*Google Bard AI Assistant*\n\n*Query:* ${query}\n\n*Response:*\n${aiResponse}\n\n> *Powered by SPOILER-TECH*`
         }, { quoted: createFakeContact(message) });
 
         // Send final reaction
