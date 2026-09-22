@@ -55,7 +55,7 @@ async function metaiCommand(sock, chatId, message) {
         const aiResponse = apiData.result.trim();
         
         await sock.sendMessage(chatId, {
-            text: `*Meta AI Assistant*\n\n*Query:* ${query}\n\n*Response:*\n ${aiResponse}\n\n> *Powered by Adevos-X Tech*`
+            text: `*Meta AI Assistant*\n\n*Query:* ${query}\n\n*Response:*\n ${aiResponse}\n\n> *Powered by SPOILER-TECH*`
         }, { quoted: createFakeContact(message) });
 
       // Send reaction
