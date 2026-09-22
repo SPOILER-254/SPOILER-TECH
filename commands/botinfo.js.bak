@@ -1,0 +1,62 @@
+const os = require('os');
+const { getBotName } = require('../lib/botConfig');
+const settings = require('../settings');
+const { createFakeContact } = require('../lib/fakeContact');
+
+const _botStart = Date.now();
+
+function _fmt(ms) {
+    const s = Math.floor(ms / 1000);
+    const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600),
+          m = Math.floor((s % 3600) / 60), sc = s % 60;
+    return [d && `${d}d`, h && `${h}h`, m && `${m}m`, `${sc}s`].filter(Boolean).join(' ');
+}
+function _bytes(b) {
+    if (b < 1024) return `${b} B`;
+    if (b < 1048576) return `${(b/1024).toFixed(1)} KB`;
+    if (b < 1073741824) return `${(b/1048576).toFixed(1)} MB`;
+    return `${(b/1073741824).toFixed(2)} GB`;
+}
+function _platform() {
+    if (process.env.DYNO) return 'Heroku';
+    if (process.env.RENDER) return 'Render';
+    switch (os.platform()) {
+        case 'win32': return 'Windows'; case 'darwin': return 'macOS';
+        case 'linux': return 'Linux'; default: return 'Unknown';
+    }
+}
+
+async function botInfoCommand(sock, chatId, message) {
+    try {
+        const uptime = Date.now() - _botStart;
+        const total = os.totalmem(), free = os.freemem(), used = total - free;
+        const cpus = os.cpus();
+
+        const text =
+`╭◆ *Brooz-X Bot Info*   
+├ *Name:* ${getBotName()}
+├ *Developer:* Deebrooz
+├ *Version:* v${settings.version || '2.0.0'}
+├ *Mode:* ${settings.commandMode || 'public'}
+├ *Uptime:* ${_fmt(uptime)}
+├
+├ *System*
+│   ╰ Platform: ${_platform()}
+│   ╰ OS: ${os.type()} ${os.release()}
+│   ╰ Arch: ${os.arch()}
+│   ╰ Node: ${process.version}
+│
+├ *CPU:* ${cpus[0]?.model?.trim() || 'N/A'} ×${cpus.length}
+
+├ *RAM*
+│    ╰ Used: ${_bytes(used)} / ${_bytes(total)}
+│    ╰ Free: ${_bytes(free)}\n╰◆`;
+
+        await sock.sendMessage(chatId, { text }, { quoted: createFakeContact(message) });
+    } catch (e) {
+        console.error('botinfo error:', e);
+        await sock.sendMessage(chatId, { text: 'Could not fetch bot info.' });
+    }
+}
+
+module.exports = botInfoCommand;

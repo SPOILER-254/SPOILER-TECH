@@ -1,0 +1,58 @@
+const os = require('os');
+const settings = require('../settings');
+const { createFakeContact } = require('../lib/fakeContact');
+
+const _start = Date.now();
+
+function _uptime(ms) {
+    const s = Math.floor(ms / 1000);
+    const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600),
+          m = Math.floor((s % 3600) / 60), sec = s % 60;
+    const p = [];
+    if (d) p.push(`${d}d`);
+    if (h) p.push(`${h}h`);
+    if (m) p.push(`${m}m`);
+    p.push(`${sec}s`);
+    return p.join(' ');
+}
+
+function _platform() {
+    if (process.env.DYNO) return 'Heroku';
+    if (process.env.RENDER) return 'Render';
+    if (process.env.PREFIX?.includes('termux')) return 'Termux';
+    if (process.env.P_SERVER_UUID) return 'Panel';
+    if (process.env.LXC) return 'Linux Container';
+    switch (os.platform()) {
+        case 'win32': return 'Windows';
+        case 'darwin': return 'macOS';
+        case 'linux': return 'Linux';
+        default: return 'Unknown';
+    }
+}
+
+async function aliveCommand(sock, chatId, message) {
+    try {
+        const uptime = _uptime(Date.now() - _start);
+        const platform = _platform();
+        const name = settings.botName || 'BROOZ-MIN BOT';
+
+        const text =
+`╭◆「 *${name}* 」
+│
+│◇ *Online & Active*
+│◇ *Uptime:* ${uptime}
+│◇ *Host:* ${platform}
+│◇ *Dev:* Deebrooz
+│◇ *Support* Poisoneking
+╰◆
+
+> I'm alive and ready send any command!`;
+
+        await sock.sendMessage(chatId, { text }, { quoted: createFakeContact(message) });
+        await sock.sendMessage(chatId, { react: { text: '🕜', key: message.key } });
+    } catch (e) {
+        console.error('alive error:', e);
+    }
+}
+
+module.exports = aliveCommand;
