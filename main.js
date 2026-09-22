@@ -49,7 +49,6 @@ const isOwnerOrSudo = require('./lib/isOwner');
 const isAdmin = require('./lib/isAdmin');
 const { tictactoeCommand, handleTicTacToeMove } = require('./commands/tictactoe');
 const { normalizeJid, compareJids } = require('./lib/jid');
-const { botkillerCmd, botkillerEngine, isBotId } = require('./Protection.js');
 const { createFakeContact } = require('./lib/fakeContact');
 const moment = require('moment-timezone');
 const timezones = settings.timezone || 'Africa/Nairobi';
@@ -326,8 +325,8 @@ const pendingCommand = require('./commands/pending');
 /*━━━━━━━━━━━━━━━━━━━━*/
 // Global settings
 /*━━━━━━━━━━━━━━━━━━━━*/
-global.packname = settings?.packname || "SPOILER-X";
-global.author = settings?.author || "SPOILER-𝐗 ";
+global.packname = settings?.packname || "ADEVOS X";
+global.author = settings?.author || "𝐁𝐋𝐀𝐂𝐊𝐋𝐎𝐑𝐃-𝐗 ";
 global.channelLink = "https://whatsapp.com/channel/0029Vb6wIVU9Bb5w69FQvt0W";
 global.ytchanel = "";
 
@@ -385,12 +384,10 @@ async function handleMessages(sock, messageUpdate, printLog) {
             await handleMessageRevocation(sock, message);
             return;
         }
-        
-    // === BOTKILLER ENGINE - KILLS BOTS IN DM/GROUP/CHANNEL ===
-    try { await botkillerEngine(message, sock); } catch(e) {}
 
-    const chatId = message.key.remoteJid;
-    const senderId = message.key.participant || message.key.remoteJid;
+        const chatId   = message.key.remoteJid;
+        const senderId = message.key.participant || message.key.remoteJid;
+
         /*━━━━━━━━━━━━━━━━━━━━*/
         // Dynamic prefix
         /*━━━━━━━━━━━━━━━━━━━━*/
@@ -519,14 +516,6 @@ async function handleMessages(sock, messageUpdate, printLog) {
         if (isGroup && userMessage) await handleBadwordDetection(sock, chatId, message, userMessage, senderId);
         if (isGroup && !message.key.fromMe) await handleLinkDetection(sock, chatId, message, userMessage, senderId);
 
-            // --- BOTKILLER COMMAND - My Lord ---
-    if (userMessage && (userMessage.startsWith(prefix + 'botkiller') || userMessage === 'botkiller' || userMessage.startsWith('botkiller '))) {
-        try { await botkillerCmd(message, userMessage.split(' ').slice(1), sock, chatId, senderId, isGroup); } catch(e) { console.log('botkiller error', e) }
-        return;
-    }
-
-    // PM blocker
-        
         // PM blocker
         if (!isGroup && !message.key.fromMe && !senderIsSudo) {
             try {
