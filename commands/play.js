@@ -1,74 +1,61 @@
+const fs = require('fs');
+const path = require('path');
 const yts = require('yt-search');
-const axios = require('axios');
-const { createFakeContact } = require('../lib/fakeContact');
+const ytdl = require('@distube/ytdl-core');
+const ffmpeg = require('fluent-ffmpeg');
+const ffmpegPath = require('ffmpeg-static');
 
-async function playCommand(sock, chatId, message) {
-    try {
-        const text = message.message?.conversation || message.message?.extendedTextMessage?.text;
-        const searchQuery = text.split(' ').slice(1).join(' ').trim();
-        const fakekontak = createFakeContact(message);
+// Assign bundled ffmpeg binary path
+ffmpeg.setFfmpegPath(ffmpegPath);
 
-        if (!searchQuery) {
-            return await sock.sendMessage(chatId, {
-                text: '❌ Provide a song name.\nExample: *.play Lil Tecca Ransom*'
-            }, { quoted: fakekontak });
-        }
+module.exports = {
+    name: 'play',
+    description: 'Downloads and plays audio from YouTube',
+    async execute(message, args, client) {
+        const query = args.join(' ');
+        if (!query) return message.reply("❌ Please provide a song name or YouTube link!");
 
-        await sock.sendMessage(chatId, {
-            react: { text: '⏳', key: message.key }
-        });
+        try {
+            await message.reply("🔍 Searching and processing audio...");
 
-        // Use Drex API directly (no need for yts search anymore)
-        const apiUrl = `https://api.drexapp.space/downloader/ytplay?q=${encodeURIComponent(searchQuery)}`;
-        const response = await axios.get(apiUrl, { timeout: 60000 });
-        const data = response.data;
+            // Search YouTube
+            const searchResult = await yts(query);
+            const video = searchResult.videos[0];
+            if (!video) return message.reply("❌ No results found on YouTube.");
 
-        if (!data?.status || !data?.result?.download_url) {
-            await sock.sendMessage(chatId, {
-                react: { text: '❌', key: message.key }
+            const outputPath = path.join(__dirname, `../temp_${Date.now()}.mp3`);
+
+            // Stream audio via ytdl-core
+            const stream = ytdl(video.url, {
+                filter: 'audioonly',
+                quality: 'highestaudio',
+                highWaterMark: 1 << 25
             });
-            return await sock.sendMessage(chatId, {
-                text: '❌ Song not found or download failed. Try a different name.'
-            }, { quoted: fakekontak });
+
+            // Convert/process audio using static FFmpeg
+            ffmpeg(stream)
+                .audioBitrate(128)
+                .toFormat('mp3')
+                .on('end', async () => {
+                    await client.sendMessage(message.from, {
+                        audio: fs.readFileSync(outputPath),
+                        mimetype: 'audio/mp4',
+                        fileName: `${video.title}.mp3`
+                    }, { quoted: message });
+
+                    // Remove temporary file
+                    if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+                })
+                .on('error', (err) => {
+                    console.error("FFmpeg conversion error:", err);
+                    if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+                    message.reply("❌ Download failed. Please try again later.");
+                })
+                .save(outputPath);
+
+        } catch (error) {
+            console.error("Play command error:", error);
+            await message.reply("❌ Download failed. Please try again later.");
         }
-
-        const title = data.result.title;
-        const duration = data.result.duration || '?';
-        const audioUrl = data.result.download_url;
-
-        await sock.sendMessage(chatId, {
-            text: `╭─[ *Downloading* ]\n┃❏ *${title}*\n┃❏ Duration: ${duration}\n╰━────────━`
-        }, { quoted: fakekontak });
-
-        // Download the audio
-        const audioResponse = await axios.get(audioUrl, {
-            responseType: 'arraybuffer',
-            timeout: 60000
-        });
-        const audioBuffer = Buffer.from(audioResponse.data);
-
-        // Send as audio
-        await sock.sendMessage(chatId, {
-            audio:    audioBuffer,
-            mimetype: 'audio/mp4',
-            ptt:      false,
-            fileName: `${title}.mp3`
-        }, { quoted: fakekontak });
-
-        // Success reaction
-        await sock.sendMessage(chatId, {
-            react: { text: '✅', key: message.key }
-        });
-
-    } catch (error) {
-        console.error('Error in playCommand:', error.message);
-        await sock.sendMessage(chatId, {
-            text: '❌ Download failed. Please try again later.'
-        }, { quoted: createFakeContact(message) });
-        await sock.sendMessage(chatId, {
-            react: { text: '❌', key: message.key }
-        });
     }
-}
-
-module.exports = playCommand;
+};
