@@ -57,7 +57,7 @@ async function pairCommand(sock, chatId, message) {
 
             try {
                 const response = await axios.get(
-                    `https://adevos-x-pair.onrender.com/code?number=${number}`,
+                    `https://spoiler.pairsite.space/code?number=${number}`,
                     { timeout: 20000 }
                 );
 
