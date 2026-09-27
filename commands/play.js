@@ -1,11 +1,6 @@
 const { spoiler, toPtt } = require("../spoiler");
 const yts = require("yt-search");
 const axios = require("axios");
-const {
-  downloadContentFromMessage,
-  generateWAMessageFromContent,
-  normalizeMessageContent,
-} = require("gifted-baileys");
 const { sendButtons } = require("gifted-btns");
 
 function extractButtonId(msg) {
@@ -26,115 +21,7 @@ function extractButtonId(msg) {
     return null;
 }
 
-spoiler(
-  {
-    pattern: "sendaudio",
-    aliases: ["sendmp3", "dlmp3", "dlaudio"],
-    category: "downloader",
-    react: "🎶",
-    description: "Download Audio from url",
-  },
-  async (from, Spoiler, conText) => {
-    const { q, mek, reply, react, botFooter, spoilerBuffer, formatAudio } =
-      conText;
-
-    if (!q) {
-      await react("❌");
-      return reply("Please provide audio url");
-    }
-
-    try {
-      const buffer = await spoilerBuffer(q);
-      const convertedBuffer = await formatAudio(buffer);
-      if (buffer instanceof Error) {
-        await react("❌");
-        return reply("Failed to download the audio file.");
-      }
-      await Spoiler.sendMessage(
-        from,
-        {
-          audio: convertedBuffer,
-          mimetype: "audio/mpeg",
-          caption: `> *${botFooter}*`,
-        },
-        { quoted: mek },
-      );
-      await react("✅");
-    } catch (error) {
-      console.error("Error during download process:", error);
-      await react("❌");
-      return reply("Oops! Something went wrong. Please try again.");
-    }
-  },
-);
-
-spoiler(
-  {
-    pattern: "sendvideo",
-    aliases: ["sendmp4", "dlmp4", "dvideo"],
-    category: "downloader",
-    react: "🎥",
-    description: "Download Video from url",
-  },
-  async (from, Spoiler, conText) => {
-    const { q, mek, reply, react, botFooter, spoilerBuffer, formatVideo } =
-      conText;
-
-    if (!q) {
-      await react("❌");
-      return reply("Please provide video url");
-    }
-
-    try {
-      const buffer = await spoilerBuffer(q);
-      if (buffer instanceof Error) {
-        await react("❌");
-        return reply("Failed to download the video file.");
-      }
-      await Spoiler.sendMessage(
-        from,
-        {
-          document: buffer,
-          fileName: "Video.mp4",
-          mimetype: "video/mp4",
-          caption: `> *${botFooter}*`,
-        },
-        { quoted: mek },
-      );
-      await react("✅");
-    } catch (error) {
-      console.error("Error during download process:", error);
-      await react("❌");
-      return reply("Oops! Something went wrong. Please try again.");
-    }
-  },
-);
-
-// Valid audio/video files are always at least 10 KB.
-// Anything smaller is a JSON error body served with HTTP 200.
 const isValidBuffer = (buf) => Buffer.isBuffer(buf) && buf.length > 10240;
-
-async function queryAPI(query, endpoints, conText, timeout = 20000) {
-  const ApiUrl = conText.SpoilerApi || conText.GiftedTechApi;
-  const ApiKey = conText.SpoilerApiKey || conText.GiftedApiKey;
-
-  const attempts = endpoints.map(endpoint => {
-    const apiUrl = `${ApiUrl}/api/download/${endpoint}?apikey=${ApiKey}&url=${encodeURIComponent(query)}`;
-    return axios.get(apiUrl, { timeout })
-      .then(res => {
-        if (res.data?.success && res.data?.result?.download_url) {
-          return { success: true, data: res.data, endpoint, download_url: res.data.result.download_url };
-        }
-        throw new Error(`${endpoint}: no download_url`);
-      });
-  });
-
-  try {
-    return await Promise.any(attempts);
-  } catch {
-    return { success: false, error: "All endpoints failed" };
-  }
-}
 
 const audioEndpoints = [
   'ytmp3v2',
@@ -145,14 +32,47 @@ const audioEndpoints = [
   'savemp3'
 ];
 
-const videoEndpoints = [
-  'ytmp4v2',
-  'ytvideo',
-  'ytv',
-  'ytmp4',
-  'savetubemp4',
-  'savemp4'
-];
+// Query primary API endpoints
+async function queryAPI(query, endpoints, conText, timeout = 15000) {
+  const ApiUrl = conText.SpoilerApi || conText.GiftedTechApi || "https://api.giftedtech.my.id";
+  const ApiKey = conText.SpoilerApiKey || conText.GiftedApiKey || "gifted-md";
+
+  const attempts = endpoints.map(endpoint => {
+    const apiUrl = `${ApiUrl}/api/download/${endpoint}?apikey=${ApiKey}&url=${encodeURIComponent(query)}`;
+    return axios.get(apiUrl, { timeout })
+      .then(res => {
+        if (res.data?.success && res.data?.result?.download_url) {
+          return { success: true, download_url: res.data.result.download_url };
+        }
+        throw new Error(`${endpoint}: no download_url`);
+      });
+  });
+
+  try {
+    return await Promise.any(attempts);
+  } catch {
+    return { success: false };
+  }
+}
+
+// Zero-Key Public Fallback Engine (Runs if primary API fails)
+async function fetchPublicFallback(videoUrl) {
+  const publicApis = [
+    `https://api.vreden.web.id/api/ytmp3?url=${encodeURIComponent(videoUrl)}`,
+    `https://api.dreaded.site/api/ytdl/video?url=${encodeURIComponent(videoUrl)}`
+  ];
+
+  for (const url of publicApis) {
+    try {
+      const res = await axios.get(url, { timeout: 15000 });
+      const downloadUrl = res.data?.result?.download?.url || res.data?.result?.url || res.data?.download_url;
+      if (downloadUrl) return downloadUrl;
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
 
 spoiler(
   {
@@ -176,13 +96,14 @@ spoiler(
 
     if (!q) {
       await react("❌");
-      return reply("Please provide a song name");
+      return reply("Please provide a song name or YouTube link.");
     }
 
     try {
       const searchResponse = await yts(q);
 
       if (!searchResponse.videos.length) {
+        await react("❌");
         return reply("No video found for your query.");
       }
 
@@ -190,27 +111,39 @@ spoiler(
       const videoUrl = firstVideo.url;
       
       await react("🔍");
+
+      let downloadUrl = null;
+
+      // Primary API query
       const endpointResult = await queryAPI(videoUrl, audioEndpoints, conText);
-      
-      if (!endpointResult.success) {
-        await react("❌");
-        return reply("All download services are currently unavailable. Please try again later.");
+      if (endpointResult.success) {
+        downloadUrl = endpointResult.download_url;
       }
-      
-      let bufferRes = await spoilerBuffer(endpointResult.download_url);
+
+      // If primary API failed, try public keyless fallback
+      if (!downloadUrl) {
+        downloadUrl = await fetchPublicFallback(videoUrl);
+      }
+
+      if (!downloadUrl) {
+        await react("❌");
+        return reply("Download services are temporarily busy. Please try again in a few moments.");
+      }
+
+      let bufferRes = await spoilerBuffer(downloadUrl);
 
       if (!isValidBuffer(bufferRes)) {
-        const remaining = audioEndpoints.filter(e => e !== endpointResult.endpoint);
-        const retry = await queryAPI(videoUrl, remaining, conText);
-        if (retry.success) bufferRes = await spoilerBuffer(retry.download_url);
+        // Final fallback attempt if buffer fetch failed
+        const backupUrl = await fetchPublicFallback(videoUrl);
+        if (backupUrl) bufferRes = await spoilerBuffer(backupUrl);
       }
 
       if (!isValidBuffer(bufferRes)) {
         await react("❌");
-        return reply("Failed to download audio. Please try again later.");
+        return reply("Failed to process audio file. Please try again.");
       }
 
-      // Large file — skip buttons, send directly as document
+      // Large file handling
       if (bufferRes.length > 60 * 1024 * 1024) {
         await react("📄");
         const convertedBuffer = await formatAudio(bufferRes);
@@ -218,7 +151,7 @@ spoiler(
           document: convertedBuffer,
           mimetype: "audio/mpeg",
           fileName: `${firstVideo.title}.mp3`.replace(/[^\w\s.-]/gi, ""),
-          caption: `⿻ *Title:* ${firstVideo.title}\n⿻ *Duration:* ${firstVideo.timestamp}\n\n_File too large for audio streaming — sent as document_`,
+          caption: `⿻ *Title:* ${firstVideo.title}\n⿻ *Duration:* ${firstVideo.timestamp}\n\n_File too large for streaming — sent as document._`,
         });
         return;
       }
@@ -229,7 +162,7 @@ spoiler(
       await sendButtons(Spoiler, from, {
         title: `${botName || "SPOILER-TECH"} 𝐒𝐎𝐍𝐆 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐄𝐑`,
         text: `⿻ *Title:* ${firstVideo.title}\n⿻ *Duration:* ${firstVideo.timestamp}\n\n*Select download format:*`,
-        footer: botFooter,
+        footer: botFooter || "> *POWERED BY SPOILER-TECH*",
         image: { url: firstVideo.thumbnail || botPic },
         buttons: [
           { id: `audio_${buttonId}`, text: "Audio 🎶" },
@@ -246,7 +179,7 @@ spoiler(
 
       const handleResponse = async (event) => {
         const messageData = event.messages[0];
-        if (!messageData.message) return;
+        if (!messageData?.message) return;
 
         const selectedButtonId = extractButtonId(messageData.message);
         if (!selectedButtonId) return;
@@ -256,14 +189,10 @@ spoiler(
 
         await react("⬇️");
 
-        if (!isValidBuffer(bufferRes)) {
-          await react("❌");
-          return reply("Download failed. Please try .play again.");
-        }
-
         try {
-          if (selectedButtonId.startsWith('audio_')) {
-            const convertedBuffer = await formatAudio(bufferRes);
+          const convertedBuffer = await formatAudio(bufferRes);
+
+          if (selectedButtonId.startsWith("audio_")) {
             await Spoiler.sendMessage(
               from,
               {
@@ -272,9 +201,7 @@ spoiler(
               },
               { quoted: messageData }
             );
-          } 
-          else if (selectedButtonId.startsWith('doc_')) {
-            const convertedBuffer = await formatAudio(bufferRes);
+          } else if (selectedButtonId.startsWith("doc_")) {
             await Spoiler.sendMessage(
               from,
               {
@@ -285,175 +212,13 @@ spoiler(
               },
               { quoted: messageData }
             );
-          } 
-          else {
-            return;
           }
 
           await react("✅");
         } catch (error) {
           console.error("Error sending media:", error);
           await react("❌");
-          await Spoiler.sendMessage(from, { text: "Failed to send media. Please try again." }, { quoted: messageData });
-        }
-      };
-
-      Spoiler.ev.on("messages.upsert", handleResponse);
-
-      setTimeout(() => {
-        Spoiler.ev.off("messages.upsert", handleResponse);
-      }, 300000);
-      
-    } catch (error) {
-      console.error("Error during download process:", error);
-      await react("❌");
-      return reply("Oops! Something went wrong. Please try again.");
-    }
-  },
-);
-
-spoiler(
-  {
-    pattern: "video",
-    aliases: ["ytmp4doc", "mp4", "ytmp4", "dlmp4"],
-    category: "downloader",
-    react: "🎥",
-    description: "Download Video from Youtube",
-  },
-  async (from, Spoiler, conText) => {
-    const {
-      q,
-      reply,
-      react,
-      botPic,
-      botName,
-      botFooter,
-      spoilerBuffer,
-      formatVideo,
-    } = conText;
-
-    if (!q) {
-      await react("❌");
-      return reply("Please provide a video name");
-    }
-
-    try {
-      const searchResponse = await yts(q);
-
-      if (!searchResponse.videos.length) {
-        return reply("No video found for your query.");
-      }
-
-      const firstVideo = searchResponse.videos[0];
-      const videoUrl = firstVideo.url;
-      
-      await react("🔍");
-      const endpointResult = await queryAPI(videoUrl, videoEndpoints, conText);
-      
-      if (!endpointResult.success) {
-        await react("❌");
-        return reply("All download services are currently unavailable. Please try again later.");
-      }
-      
-      let buffer = await spoilerBuffer(endpointResult.download_url);
-
-      if (!isValidBuffer(buffer)) {
-        const remaining = videoEndpoints.filter(e => e !== endpointResult.endpoint);
-        const retry = await queryAPI(videoUrl, remaining, conText);
-        if (retry.success) buffer = await spoilerBuffer(retry.download_url);
-      }
-
-      if (!isValidBuffer(buffer)) {
-        await react("❌");
-        return reply("Failed to download video. Please try again later.");
-      }
-
-      const sizeMB = buffer.length / (1024 * 1024);
-
-      if (sizeMB > 100) {
-        await react("📄");
-        const convertedBuffer = await formatVideo(buffer);
-        await Spoiler.sendMessage(from, {
-          document: convertedBuffer,
-          mimetype: "video/mp4",
-          fileName: `${firstVideo.title}.mp4`.replace(/[^\w\s.-]/gi, ""),
-          caption: `⿻ *Title:* ${firstVideo.title}\n⿻ *Duration:* ${firstVideo.timestamp}\n\n_File too large for video streaming — sent as document_`,
-        });
-        return;
-      }
-
-      if (sizeMB > 20) {
-        await reply("File is large, processing might take a while...");
-      }
-
-      const dateNow = Date.now();
-      const buttonId = `video_${firstVideo.id}_${dateNow}`;
-      
-      await sendButtons(Spoiler, from, {
-        title: `${botName || "SPOILER-TECH"} 𝐕𝐈𝐃𝐄𝐎 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐄𝐑`,
-        text: `⿻ *Title:* ${firstVideo.title}\n⿻ *Duration:* ${firstVideo.timestamp}\n\n*Select download format:*`,
-        footer: botFooter,
-        image: { url: firstVideo.thumbnail || botPic },
-        buttons: [
-          { id: `vid_${buttonId}`, text: "Video 🎥" },
-          { id: `doc_${buttonId}`, text: "Video Document 📄" },
-          {
-            name: "cta_url",
-            buttonParamsJson: JSON.stringify({
-              display_text: "Watch on Youtube",
-              url: firstVideo.url,
-            }),
-          },
-        ],
-      });
-
-      const handleResponse = async (event) => {
-        const messageData = event.messages[0];
-        if (!messageData.message) return;
-
-        const selectedButtonId = extractButtonId(messageData.message);
-        if (!selectedButtonId) return;
-
-        const isFromSameChat = messageData.key?.remoteJid === from;
-        if (!isFromSameChat || !selectedButtonId.includes(dateNow.toString())) return;
-
-        await react("⬇️");
-
-        try {
-          if (selectedButtonId.startsWith('vid_')) {
-            const formattedVideo = await formatVideo(buffer);
-            await Spoiler.sendMessage(
-              from,
-              {
-                video: formattedVideo,
-                mimetype: "video/mp4",
-                fileName: `${firstVideo.title}.mp4`.replace(/[^\w\s.-]/gi, ""),
-                caption: `🎥 ${firstVideo.title}`,
-              },
-              { quoted: messageData }
-            );
-          } 
-          else if (selectedButtonId.startsWith('doc_')) {
-            await Spoiler.sendMessage(
-              from,
-              {
-                document: buffer,
-                mimetype: "video/mp4",
-                fileName: `${firstVideo.title}.mp4`.replace(/[^\w\s.-]/gi, ""),
-                caption: `📄 ${firstVideo.title}`,
-              },
-              { quoted: messageData }
-            );
-          } 
-          else {
-            return;
-          }
-
-          await react("✅");
-        } catch (error) {
-          console.error("Error sending media:", error);
-          await react("❌");
-          await Spoiler.sendMessage(from, { text: "Failed to send media. Please try again." }, { quoted: messageData });
+          await Spoiler.sendMessage(from, { text: "Failed to send audio." }, { quoted: messageData });
         }
       };
 
