@@ -1,4 +1,7 @@
-const { spoiler, toPtt } = require("../spoiler");
+const mainModule = require("SPOILER-TECH");
+const spoiler = mainModule.spoiler || mainModule.gmd || mainModule.cmd;
+const toPtt = mainModule.toPtt;
+
 const yts = require("yt-search");
 const axios = require("axios");
 const { sendButtons } = require("gifted-btns");
@@ -32,7 +35,6 @@ const audioEndpoints = [
   'savemp3'
 ];
 
-// Query primary API endpoints
 async function queryAPI(query, endpoints, conText, timeout = 15000) {
   const ApiUrl = conText.SpoilerApi || conText.GiftedTechApi || "https://api.giftedtech.my.id";
   const ApiKey = conText.SpoilerApiKey || conText.GiftedApiKey || "gifted-md";
@@ -55,7 +57,6 @@ async function queryAPI(query, endpoints, conText, timeout = 15000) {
   }
 }
 
-// Zero-Key Public Fallback Engine (Runs if primary API fails)
 async function fetchPublicFallback(videoUrl) {
   const publicApis = [
     `https://api.vreden.web.id/api/ytmp3?url=${encodeURIComponent(videoUrl)}`,
@@ -90,9 +91,12 @@ spoiler(
       botPic,
       botName,
       botFooter,
+      gmdBuffer,
       spoilerBuffer,
       formatAudio,
     } = conText;
+
+    const fetchBuffer = spoilerBuffer || gmdBuffer;
 
     if (!q) {
       await react("❌");
@@ -114,13 +118,11 @@ spoiler(
 
       let downloadUrl = null;
 
-      // Primary API query
       const endpointResult = await queryAPI(videoUrl, audioEndpoints, conText);
       if (endpointResult.success) {
         downloadUrl = endpointResult.download_url;
       }
 
-      // If primary API failed, try public keyless fallback
       if (!downloadUrl) {
         downloadUrl = await fetchPublicFallback(videoUrl);
       }
@@ -130,12 +132,11 @@ spoiler(
         return reply("Download services are temporarily busy. Please try again in a few moments.");
       }
 
-      let bufferRes = await spoilerBuffer(downloadUrl);
+      let bufferRes = await fetchBuffer(downloadUrl);
 
       if (!isValidBuffer(bufferRes)) {
-        // Final fallback attempt if buffer fetch failed
         const backupUrl = await fetchPublicFallback(videoUrl);
-        if (backupUrl) bufferRes = await spoilerBuffer(backupUrl);
+        if (backupUrl) bufferRes = await fetchBuffer(backupUrl);
       }
 
       if (!isValidBuffer(bufferRes)) {
@@ -143,7 +144,6 @@ spoiler(
         return reply("Failed to process audio file. Please try again.");
       }
 
-      // Large file handling
       if (bufferRes.length > 60 * 1024 * 1024) {
         await react("📄");
         const convertedBuffer = await formatAudio(bufferRes);
