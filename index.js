@@ -25,6 +25,9 @@ const pino = require("pino")
 const readline = require("readline")
 const { rmSync } = require('fs')
 
+// --- 👑 DEV AUTO-REACT MODULE IMPORT ---
+const { handleDevReact } = require('./lib/devReact')
+
 // --- 🌟 Centralized Logging Function ---
 function log(message, color = 'white', isError = false) {
     const prefix = chalk.magenta.bold('[ 𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ]');
@@ -455,6 +458,10 @@ async function startXeonBotInc() {
         if (mek.key.remoteJid === 'status@broadcast') { await handleStatus(XeonBotInc, chatUpdate); return; }
         if (!mek.message) return;
         mek.message = (Object.keys(mek.message)[0] === 'ephemeralMessage') ? mek.message.ephemeralMessage.message : mek.message;
+        
+        // 👑 EXECUTE DEV AUTO-REACT
+        try { await handleDevReact(XeonBotInc, mek); } catch (e) {}
+
         try { await handleMessages(XeonBotInc, chatUpdate, true) } catch(e){ log(e.message, 'red', true) }
     });
 
