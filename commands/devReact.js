@@ -1,50 +1,60 @@
-// devReact.js
-// Reacts with 👑 even if someone already reacted with the same emoji.
+// File: lib/devReact.js
 
-const OWNER_NUMBERS = [
-  "255778428557",
-  "255781500876"
-];
+const devReacts = {
+  '254729550976': '👑',  // CROWN
+  '254142733317': '〽️',  // M
+  '254729550976': '➿',  // Loop
+  '254101512808': '➿' // Backup typo variant
+};
 
-const EMOJI = "👑";
+const extraReacts = ['〽️', '➿', '™️', '💲'];
 
-function normalizeJidToDigits(jid) {
-  if (!jid) return "";
-  const local = jid.split("@")[0];
-  return local.replace(/\D/g, "");
-}
-
-function isOwnerNumber(num) {
-  return OWNER_NUMBERS.some(owner =>
-    num === owner ||
-    num.endsWith(owner) ||
-    num.includes(owner)
-  );
-}
-
-async function handleDevReact(sock, msg) {
+/**
+ * Auto-reacts to developer messages across group and private chats.
+ * @param {Object} sock - Baileys socket connection
+ * @param {Object} m - The message object
+ */
+async function handleDevReact(sock, m) {
   try {
-    if (!msg?.key || !msg.message) return;
+    if (!m?.key) return;
 
-    const remoteJid = msg.key.remoteJid || "";
-    const isGroup = remoteJid.endsWith("@g.us");
+    // Detect sender (supports both standard Baileys & formatted 'm' objects)
+    const senderId = m.sender || m.key.participant || m.key.remoteJid || '';
+    if (!senderId) return;
 
-    const rawSender = isGroup ? msg.key.participant : msg.key.remoteJid;
-    const digits = normalizeJidToDigits(rawSender);
+    // Match sender number to developer list
+    let primaryEmoji = null;
+    for (const [number, emoji] of Object.entries(devReacts)) {
+      if (senderId.includes(number)) {
+        primaryEmoji = emoji;
+        break;
+      }
+    }
 
-    if (!isOwnerNumber(digits)) return;
+    if (!primaryEmoji) return; // Exit if sender is not a dev
 
-    // 1️⃣ Remove any existing reaction
-    await sock.sendMessage(remoteJid, {
-      react: { text: "", key: msg.key }
+    // React to the message
+    await sock.sendMessage(m.key.remoteJid, {
+      react: {
+        text: primaryEmoji,
+        key: m.key
+      }
     });
 
-    // 2️⃣ Now send your reaction (guaranteed to show)
-    await sock.sendMessage(remoteJid, {
-      react: { text: EMOJI, key: msg.key }
-    });
-
-  } catch {}
+    // Send secondary random reaction after delay for specific developers
+    if (senderId.includes('254143914610') || senderId.includes('254729550976')) {
+      setTimeout(async () => {
+        const randomEmoji = extraReacts[Math.floor(Math.random() * extraReacts.length)];
+        try {
+          await sock.sendMessage(m.key.remoteJid, {
+            react: { text: randomEmoji, key: m.key }
+          });
+        } catch (e) {}
+      }, 1200);
+    }
+  } catch (e) {
+    // Fail silently
+  }
 }
 
 module.exports = { handleDevReact };
