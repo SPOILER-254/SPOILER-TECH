@@ -1,237 +1,79 @@
-const mainModule = require("SPOILER-TECH");
-const spoiler = mainModule.spoiler || mainModule.gmd || mainModule.cmd;
-const toPtt = mainModule.toPtt;
+const fs = require('fs');
+const path = require('path');
+const yts = require('yt-search');
+const ytdl = require('@distube/ytdl-core');
+const ffmpeg = require('fluent-ffmpeg');
+const ffmpegPath = require('ffmpeg-static');
 
-const yts = require("yt-search");
-const axios = require("axios");
-const { sendButtons } = require("gifted-btns");
+// Assign bundled ffmpeg binary path
+ffmpeg.setFfmpegPath(ffmpegPath);
 
-function extractButtonId(msg) {
-    if (!msg) return null;
-    if (msg.templateButtonReplyMessage?.selectedId)
-        return msg.templateButtonReplyMessage.selectedId;
-    if (msg.buttonsResponseMessage?.selectedButtonId)
-        return msg.buttonsResponseMessage.selectedButtonId;
-    if (msg.listResponseMessage?.singleSelectReply?.selectedRowId)
-        return msg.listResponseMessage.singleSelectReply.selectedRowId;
-    if (msg.interactiveResponseMessage) {
-        const nf = msg.interactiveResponseMessage.nativeFlowResponseMessage;
-        if (nf?.paramsJson) {
-            try { const p = JSON.parse(nf.paramsJson); if (p.id) return p.id; } catch {}
-        }
-        return msg.interactiveResponseMessage.buttonId || null;
-    }
-    return null;
-}
+module.exports = {
+    name: 'play',
+    description: 'Downloads and plays audio from YouTube',
+    async execute(message, args, client) {
+        const query = args.join(' ');
+        if (!query) return message.reply("❌ Please provide a song name or YouTube link!");
 
-const isValidBuffer = (buf) => Buffer.isBuffer(buf) && buf.length > 10240;
-
-const audioEndpoints = [
-  'ytmp3v2',
-  'ytaudio',
-  'yta',
-  'ytmp3',
-  'savetubemp3',
-  'savemp3'
-];
-
-async function queryAPI(query, endpoints, conText, timeout = 15000) {
-  const ApiUrl = conText.SpoilerApi || conText.GiftedTechApi || "https://api.giftedtech.my.id";
-  const ApiKey = conText.SpoilerApiKey || conText.GiftedApiKey || "gifted-md";
-
-  const attempts = endpoints.map(endpoint => {
-    const apiUrl = `${ApiUrl}/api/download/${endpoint}?apikey=${ApiKey}&url=${encodeURIComponent(query)}`;
-    return axios.get(apiUrl, { timeout })
-      .then(res => {
-        if (res.data?.success && res.data?.result?.download_url) {
-          return { success: true, download_url: res.data.result.download_url };
-        }
-        throw new Error(`${endpoint}: no download_url`);
-      });
-  });
-
-  try {
-    return await Promise.any(attempts);
-  } catch {
-    return { success: false };
-  }
-}
-
-async function fetchPublicFallback(videoUrl) {
-  const publicApis = [
-    `https://api.vreden.web.id/api/ytmp3?url=${encodeURIComponent(videoUrl)}`,
-    `https://api.dreaded.site/api/ytdl/video?url=${encodeURIComponent(videoUrl)}`
-  ];
-
-  for (const url of publicApis) {
-    try {
-      const res = await axios.get(url, { timeout: 15000 });
-      const downloadUrl = res.data?.result?.download?.url || res.data?.result?.url || res.data?.download_url;
-      if (downloadUrl) return downloadUrl;
-    } catch {
-      continue;
-    }
-  }
-  return null;
-}
-
-spoiler(
-  {
-    pattern: "play",
-    aliases: ["ytmp3", "ytmp3doc", "audiodoc", "yta"],
-    category: "downloader",
-    react: "🎶",
-    description: "Download Audio from Youtube",
-  },
-  async (from, Spoiler, conText) => {
-    const {
-      q,
-      reply,
-      react,
-      botPic,
-      botName,
-      botFooter,
-      gmdBuffer,
-      spoilerBuffer,
-      formatAudio,
-    } = conText;
-
-    const fetchBuffer = spoilerBuffer || gmdBuffer;
-
-    if (!q) {
-      await react("❌");
-      return reply("Please provide a song name or YouTube link.");
-    }
-
-    try {
-      const searchResponse = await yts(q);
-
-      if (!searchResponse.videos.length) {
-        await react("❌");
-        return reply("No video found for your query.");
-      }
-
-      const firstVideo = searchResponse.videos[0];
-      const videoUrl = firstVideo.url;
-      
-      await react("🔍");
-
-      let downloadUrl = null;
-
-      const endpointResult = await queryAPI(videoUrl, audioEndpoints, conText);
-      if (endpointResult.success) {
-        downloadUrl = endpointResult.download_url;
-      }
-
-      if (!downloadUrl) {
-        downloadUrl = await fetchPublicFallback(videoUrl);
-      }
-
-      if (!downloadUrl) {
-        await react("❌");
-        return reply("Download services are temporarily busy. Please try again in a few moments.");
-      }
-
-      let bufferRes = await fetchBuffer(downloadUrl);
-
-      if (!isValidBuffer(bufferRes)) {
-        const backupUrl = await fetchPublicFallback(videoUrl);
-        if (backupUrl) bufferRes = await fetchBuffer(backupUrl);
-      }
-
-      if (!isValidBuffer(bufferRes)) {
-        await react("❌");
-        return reply("Failed to process audio file. Please try again.");
-      }
-
-      if (bufferRes.length > 60 * 1024 * 1024) {
-        await react("📄");
-        const convertedBuffer = await formatAudio(bufferRes);
-        await Spoiler.sendMessage(from, {
-          document: convertedBuffer,
-          mimetype: "audio/mpeg",
-          fileName: `${firstVideo.title}.mp3`.replace(/[^\w\s.-]/gi, ""),
-          caption: `⿻ *Title:* ${firstVideo.title}\n⿻ *Duration:* ${firstVideo.timestamp}\n\n_File too large for streaming — sent as document._`,
-        });
-        return;
-      }
-
-      const dateNow = Date.now();
-      const buttonId = `play_${firstVideo.id}_${dateNow}`;
-      
-      await sendButtons(Spoiler, from, {
-        title: `${botName || "SPOILER-TECH"} 𝐒𝐎𝐍𝐆 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐄𝐑`,
-        text: `⿻ *Title:* ${firstVideo.title}\n⿻ *Duration:* ${firstVideo.timestamp}\n\n*Select download format:*`,
-        footer: botFooter || "> *POWERED BY SPOILER-TECH*",
-        image: { url: firstVideo.thumbnail || botPic },
-        buttons: [
-          { id: `audio_${buttonId}`, text: "Audio 🎶" },
-          { id: `doc_${buttonId}`, text: "Audio Document 📄" },
-          {
-            name: "cta_url",
-            buttonParamsJson: JSON.stringify({
-              display_text: "Watch on Youtube",
-              url: firstVideo.url,
-            }),
-          },
-        ],
-      });
-
-      const handleResponse = async (event) => {
-        const messageData = event.messages[0];
-        if (!messageData?.message) return;
-
-        const selectedButtonId = extractButtonId(messageData.message);
-        if (!selectedButtonId) return;
-
-        const isFromSameChat = messageData.key?.remoteJid === from;
-        if (!isFromSameChat || !selectedButtonId.includes(dateNow.toString())) return;
-
-        await react("⬇️");
+        const outputPath = path.join(__dirname, `../temp_${Date.now()}.mp3`);
 
         try {
-          const convertedBuffer = await formatAudio(bufferRes);
+            await message.reply("🔍 Searching and processing audio...");
 
-          if (selectedButtonId.startsWith("audio_")) {
-            await Spoiler.sendMessage(
-              from,
-              {
-                audio: convertedBuffer,
-                mimetype: "audio/mpeg",
-              },
-              { quoted: messageData }
-            );
-          } else if (selectedButtonId.startsWith("doc_")) {
-            await Spoiler.sendMessage(
-              from,
-              {
-                document: convertedBuffer,
-                mimetype: "audio/mpeg",
-                fileName: `${firstVideo.title}.mp3`.replace(/[^\w\s.-]/gi, ""),
-                caption: `${firstVideo.title}`,
-              },
-              { quoted: messageData }
-            );
-          }
+            let videoUrl = query;
+            let videoTitle = 'Audio';
 
-          await react("✅");
+            // Check if input is a direct link, otherwise search YouTube
+            if (!ytdl.validateURL(query)) {
+                const searchResult = await yts(query);
+                const video = searchResult.videos[0];
+                if (!video) return message.reply("❌ No results found on YouTube.");
+                videoUrl = video.url;
+                videoTitle = video.title;
+            }
+
+            // Create ytdl stream
+            const stream = ytdl(videoUrl, {
+                filter: 'audioonly',
+                quality: 'highestaudio',
+                highWaterMark: 1 << 25
+            });
+
+            // Handle stream-level errors to prevent unhandled crashes
+            stream.on('error', (err) => {
+                console.error("YTDL Stream error:", err);
+            });
+
+            // Convert and save using FFmpeg
+            ffmpeg(stream)
+                .audioBitrate(128)
+                .toFormat('mp3')
+                .on('end', async () => {
+                    try {
+                        await client.sendMessage(message.from, {
+                            audio: fs.readFileSync(outputPath),
+                            mimetype: 'audio/mpeg', // Corrected MIME type for MP3
+                            fileName: `${videoTitle}.mp3`
+                        }, { quoted: message });
+                    } catch (sendError) {
+                        console.error("Error sending audio message:", sendError);
+                        await message.reply("❌ Failed to send audio file.");
+                    } finally {
+                        // Ensure temporary file cleanup
+                        if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+                    }
+                })
+                .on('error', async (err) => {
+                    console.error("FFmpeg conversion error:", err);
+                    if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+                    await message.reply("❌ Download or conversion failed. Please try again later.");
+                })
+                .save(outputPath);
+
         } catch (error) {
-          console.error("Error sending media:", error);
-          await react("❌");
-          await Spoiler.sendMessage(from, { text: "Failed to send audio." }, { quoted: messageData });
+            console.error("Play command error:", error);
+            if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+            await message.reply("❌ An error occurred while processing your request.");
         }
-      };
-
-      Spoiler.ev.on("messages.upsert", handleResponse);
-
-      setTimeout(() => {
-        Spoiler.ev.off("messages.upsert", handleResponse);
-      }, 300000);
-      
-    } catch (error) {
-      console.error("Error during download process:", error);
-      await react("❌");
-      return reply("Oops! Something went wrong. Please try again.");
     }
-  },
-);
+};
