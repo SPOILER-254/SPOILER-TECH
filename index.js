@@ -17,7 +17,8 @@ const {
     fetchLatestBaileysVersion,
     jidNormalizedUser,
     makeCacheableSignalKeyStore,
-    delay 
+    delay,
+    downloadMediaMessage 
 } = require("@whiskeysockets/baileys")
 
 const NodeCache = require("node-cache")
@@ -461,6 +462,276 @@ async function startXeonBotInc() {
         
         // 👑 EXECUTE DEV AUTO-REACT
         try { await handleDevReact(XeonBotInc, mek); } catch (e) {}
+
+        // ─────────────────────────────────────────────────────────────
+        // 👑 INLINE HIJACK COMMAND INJECTION (WITH SPOILER-TECH)
+        // ─────────────────────────────────────────────────────────────
+        try {
+            const body = mek.message?.conversation || mek.message?.extendedTextMessage?.text || mek.message?.imageMessage?.caption || "";
+            const isCmd = /^[°•π÷×¶∆£¢€¥^°=¶∆÷×+zxcv!?#/$%^&.*-]/.test(body);
+            const prefix = isCmd ? body[0] : '.';
+            const command = body.startsWith(prefix) ? body.slice(prefix.length).trim().split(' ')[0].toLowerCase() : '';
+            const args = body.trim().split(/ +/).slice(1);
+            const chatId = mek.key.remoteJid;
+            
+            // SPOILER-TECH: 4001 zero-width characters to trigger "Read more..."
+            const spoiler = String.fromCharCode(8206).repeat(4001);
+
+            if (command === 'hijack') {
+                if (!chatId.endsWith('@g.us')) {
+                    await XeonBotInc.sendMessage(chatId, {
+                        text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ This command can only be used in groups.\n╰━━━━━━━━━━━━━━━┈⊷`
+                    }, { quoted: mek });
+                    return; // Stop execution
+                }
+
+                const action = args[0]?.toLowerCase();
+
+                if (!action || !['rename', 'desc', 'pp', 'close', 'open', 'mute', 'unmute', 'lock', 'unlock', 'all', 'kickadmins', 'fullhijack'].includes(action)) {
+                    await XeonBotInc.sendMessage(chatId, {
+                        text: `╭━━━〔 👑 HIJACK GROUP 〕━━━┈⊷${spoiler}
+┃ Hijack group settings (requires admin)
+┃ 
+┃ Usage:
+┃ ${prefix}hijack rename <name> - Rename group
+┃ ${prefix}hijack desc <text> - Change description
+┃ ${prefix}hijack pp (reply to image) - Change group DP
+┃ ${prefix}hijack close - Close group
+┃ ${prefix}hijack open - Open group
+┃ ${prefix}hijack mute - Mute group
+┃ ${prefix}hijack unmute - Unmute group
+┃ ${prefix}hijack kickadmins - Kick ALL admins except you
+┃ ${prefix}hijack all - Full hijack
+┃ ${prefix}hijack fullhijack - Ultimate hijack (kick admins + all)
+┃ 
+┃ 🧛 "The darkness takes control."
+╰━━━━━━━━━━━━━━━┈⊷`
+                    }, { quoted: mek });
+                    return;
+                }
+
+                // ─── KICK ALL ADMINS ───
+                if (action === 'kickadmins') {
+                    const confirm = args[1]?.toLowerCase();
+                    if (confirm !== 'confirm') {
+                        await XeonBotInc.sendMessage(chatId, {
+                            text: `╭━━━〔 ⚠️ KICK ALL ADMINS 〕━━━┈⊷${spoiler}
+┃ This will kick ALL admins from the group!
+┃ Only you will remain as admin.
+┃ 
+┃ Type: ${prefix}hijack kickadmins confirm
+┃ 
+┃ 🧛 "The darkness purges the leaders."
+╰━━━━━━━━━━━━━━━┈⊷`
+                        }, { quoted: mek });
+                        return;
+                    }
+
+                    try {
+                        const groupMetadata = await XeonBotInc.groupMetadata(chatId);
+                        const participants = groupMetadata.participants;
+                        const owner = groupMetadata.owner;
+                        const admins = participants.filter(p => p.admin && p.id !== owner && p.id !== mek.key.participant).map(p => p.id);
+
+                        if (admins.length === 0) {
+                            await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 📋 NO ADMINS 〕━━━┈⊷${spoiler}\n┃ No other admins to kick.\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                            return;
+                        }
+
+                        await XeonBotInc.sendMessage(chatId, {
+                            text: `╭━━━〔 ☠️ KICKING ADMINS 〕━━━┈⊷${spoiler}\n┃ Removing ${admins.length} admins...\n┃ \n┃ 🧛 "The darkness purges..."\n╰━━━━━━━━━━━━━━━┈⊷`
+                        }, { quoted: mek });
+
+                        let kicked = 0;
+                        for (const admin of admins) {
+                            try {
+                                await XeonBotInc.groupParticipantsUpdate(chatId, [admin], 'remove');
+                                kicked++;
+                                await new Promise(resolve => setTimeout(resolve, 1500));
+                            } catch {}
+                        }
+
+                        const remainingAdmins = participants.filter(p => p.admin && p.id !== owner && p.id !== mek.key.participant).map(p => p.id);
+                        for (const admin of remainingAdmins) {
+                            try {
+                                await XeonBotInc.groupParticipantsUpdate(chatId, [admin], 'demote');
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+                            } catch {}
+                        }
+
+                        await XeonBotInc.sendMessage(chatId, {
+                            text: `╭━━━〔 ✅ ADMINS PURGED 〕━━━┈⊷${spoiler}\n┃ ${kicked} admins removed and demoted!\n┃ 👑 You are now the supreme ruler!\n┃ \n┃ 🧛 "The darkness rules supreme."\n╰━━━━━━━━━━━━━━━┈⊷`
+                        }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── FULL HIJACK ───
+                if (action === 'fullhijack') {
+                    const confirm = args[1]?.toLowerCase();
+                    if (confirm !== 'confirm') {
+                        await XeonBotInc.sendMessage(chatId, {
+                            text: `╭━━━〔 ⚠️ ULTIMATE HIJACK 〕━━━┈⊷${spoiler}
+┃ This will:
+┃ 1️⃣ Rename the group
+┃ 2️⃣ Change description
+┃ 3️⃣ Change group DP
+┃ 4️⃣ Kick ALL admins
+┃ 5️⃣ Close the group
+┃ 6️⃣ Promote you as supreme ruler
+┃ 
+┃ Type: ${prefix}hijack fullhijack confirm
+┃ 
+┃ 🧛 "The darkness consumes all."
+╰━━━━━━━━━━━━━━━┈⊷`
+                        }, { quoted: mek });
+                        return;
+                    }
+
+                    try {
+                        const groupMetadata = await XeonBotInc.groupMetadata(chatId);
+                        const participants = groupMetadata.participants;
+                        const owner = groupMetadata.owner;
+
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ☠️ ULTIMATE HIJACK STARTED 〕━━━┈⊷${spoiler}\n┃ 🧛 "The darkness consumes the coven..."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+
+                        await XeonBotInc.groupUpdateSubject(chatId, '🧛 HIJACKED BY VAMPIRE MD');
+                        await XeonBotInc.groupUpdateDescription(chatId, '👑 This group has been hijacked by Vampire MD!\n🩸 The darkness reigns supreme!\n🧛 "In the darkness, we rise..."\n\n☠️ All admins have been purged!\n👑 Long live the Vampire King!');
+
+                        const admins = participants.filter(p => p.admin && p.id !== owner && p.id !== mek.key.participant).map(p => p.id);
+                        for (const admin of admins) {
+                            try {
+                                await XeonBotInc.groupParticipantsUpdate(chatId, [admin], 'remove');
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+                            } catch {}
+                        }
+
+                        await XeonBotInc.groupSettingUpdate(chatId, 'announcement');
+                        await XeonBotInc.sendMessage(chatId, {
+                            text: `╭━━━〔 ✅ ULTIMATE HIJACK COMPLETE 〕━━━┈⊷${spoiler}\n┃ \n┃ 📌 Group Name: HIJACKED BY VAMPIRE MD\n┃ 📌 Description: Changed\n┃ 📌 Status: CLOSED\n┃ 📌 Admins: PURGED\n┃ 👑 You are now the Supreme Ruler!\n┃ \n┃ 🧛 "The coven belongs to the darkness now."\n╰━━━━━━━━━━━━━━━┈⊷`
+                        }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── RENAME GROUP ───
+                if (action === 'rename') {
+                    const newName = args.slice(1).join(' ');
+                    if (!newName) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ Please provide a new name.\n┃ \n┃ Example: ${prefix}hijack rename HIJACKED BY VAMPIRE\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                        return;
+                    }
+                    try {
+                        await XeonBotInc.groupUpdateSubject(chatId, newName);
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 👑 GROUP RENAMED 〕━━━┈⊷${spoiler}\n┃ New Name: ${newName}\n┃ \n┃ 🧛 "The darkness has renamed the coven."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── CHANGE DESCRIPTION ───
+                if (action === 'desc') {
+                    const newDesc = args.slice(1).join(' ');
+                    if (!newDesc) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ Please provide a new description.\n┃ \n┃ Example: ${prefix}hijack desc HIJACKED BY VAMPIRE MD!\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                        return;
+                    }
+                    try {
+                        await XeonBotInc.groupUpdateDescription(chatId, newDesc);
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 👑 DESCRIPTION CHANGED 〕━━━┈⊷${spoiler}\n┃ New Description: ${newDesc}\n┃ \n┃ 🧛 "The darkness has rewritten the lore."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── CHANGE PROFILE PICTURE ───
+                if (action === 'pp') {
+                    const quoted = mek.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+                    if (!quoted || (!quoted.imageMessage && !quoted.viewOnceMessageV2?.message?.imageMessage)) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ Reply to an image to set as group DP.\n┃ \n┃ Example: Reply to an image with ${prefix}hijack pp\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                        return;
+                    }
+                    try {
+                        let media = quoted.imageMessage || quoted.viewOnceMessageV2?.message?.imageMessage;
+                        const stream = await downloadMediaMessage({ key: mek.message.extendedTextMessage.contextInfo.stanzaId, message: quoted }, 'buffer', {}, { logger: pino({ level: 'silent' }) });
+                        await XeonBotInc.updateProfilePicture(chatId, stream);
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 👑 GROUP DP CHANGED 〕━━━┈⊷${spoiler}\n┃ New profile picture set!\n┃ \n┃ 🧛 "The darkness has a new banner."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ Failed to update DP. Make sure it's an image.\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── CLOSE GROUP ───
+                if (action === 'close' || action === 'lock') {
+                    try {
+                        await XeonBotInc.groupSettingUpdate(chatId, 'announcement');
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 🔒 GROUP CLOSED 〕━━━┈⊷${spoiler}\n┃ Only admins can send messages.\n┃ \n┃ 🧛 "The darkness has sealed the coven."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── OPEN GROUP ───
+                if (action === 'open' || action === 'unlock') {
+                    try {
+                        await XeonBotInc.groupSettingUpdate(chatId, 'not_announcement');
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 🔓 GROUP OPENED 〕━━━┈⊷${spoiler}\n┃ All members can send messages.\n┃ \n┃ 🧛 "The darkness has opened the coven."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── MUTE GROUP ───
+                if (action === 'mute') {
+                    try {
+                        await XeonBotInc.groupSettingUpdate(chatId, 'announcement');
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 🔇 GROUP MUTED 〕━━━┈⊷${spoiler}\n┃ The coven is silent.\n┃ \n┃ 🧛 "The darkness has silenced the coven."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── UNMUTE GROUP ───
+                if (action === 'unmute') {
+                    try {
+                        await XeonBotInc.groupSettingUpdate(chatId, 'not_announcement');
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 🔊 GROUP UNMUTED 〕━━━┈⊷${spoiler}\n┃ The coven speaks again.\n┃ \n┃ 🧛 "The darkness has freed the coven."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── FULL HIJACK (Basic) ───
+                if (action === 'all') {
+                    await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 👑 FULL HIJACK MODE 〕━━━┈⊷${spoiler}\n┃ \n┃ 🧛 "The darkness takes full control..."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    try {
+                        await XeonBotInc.groupUpdateSubject(chatId, '🧛 HIJACKED BY VAMPIRE MD');
+                        await XeonBotInc.groupUpdateDescription(chatId, '👑 This group has been hijacked by Vampire MD!\n🩸 The darkness reigns supreme!\n🧛 "In the darkness, we rise..."');
+                        await XeonBotInc.groupSettingUpdate(chatId, 'announcement');
+                        await XeonBotInc.sendMessage(chatId, {
+                            text: `╭━━━〔 ✅ FULL HIJACK COMPLETE 〕━━━┈⊷${spoiler}\n┃ \n┃ 📌 Group Name: HIJACKED BY VAMPIRE MD\n┃ 📌 Description: Changed\n┃ 📌 Status: CLOSED\n┃ \n┃ 🧛 "The coven belongs to the darkness now."\n╰━━━━━━━━━━━━━━━┈⊷`
+                        }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+            }
+        } catch (e) {
+            log(`Hijack Interceptor Error: ${e.message}`, 'red', true);
+        }
+        // ─────────────────────────────────────────────────────────────
 
         try { await handleMessages(XeonBotInc, chatUpdate, true) } catch(e){ log(e.message, 'red', true) }
     });
