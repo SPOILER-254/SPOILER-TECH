@@ -7,8 +7,8 @@
   <img src="https://i.ibb.co/q3D8PGcz/131c967667ef.jpg" width="1000" style="border-radius: 50%; border: 3px solid red; box-shadow: 0 0 20px red;" alt="SPOILER TECH" />
 </p>
 
-<h1 align="center">𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇</h1>
-<h3 align="center">supreme </h3>
+<h1 align="center">𝐒TINGER-𝐓𝐄𝐂𝐇</h1>
+<h3 align="center">KINGS </h3>
 <div align="center">
   
 <div align="center">
@@ -43,9 +43,7 @@ Spoiler Tech - WhatsApp bot framework | Leaks | Tools
 
 | Method | Button |
 |--------|--------|
-| **Pair Code 1** | <a href=""><img src="https://img.shields.io/badge/Pair%20Code%20%231-1a1a4e?style=for-the-badge&logo=whatsapp&logoColor=white&logoSize=auto"/></a> |
-| **Pair Code 2** | <a href="https://spoiler.pairsite.space/"><img src="https://img.shields.io/badge/Pair%20Code%20%232-1a1a4e?style=for-the-badge&logo=whatsapp&logoColor=white&logoSize=auto"/></a> |
-
+| **Pair Code 1** | <a href="a href="https://spoiler.pairsite.space"><img src="https://img.shields.io/badge/Pair%20Code%20%231-1a1a4e?style=for-the-badge&logo=whatsapp&logoColor=white&logoSize=auto"/></a> 
 ![GitHub stars](https://img.shields.io/github/stars/spoiler-254/spoiler-tech?style=for-the-badge&color=darkgreen)
 ![GitHub forks](https://img.shields.io/github/forks/spoiler-254/spoiler-tech?style=for-the-badge&color=darkgreen)
 ![GitHub repo size](https://img.shields.io/github/repo-size/spoiler-254/spoiler-tech?style=for-the-badge&color=darkgreen)
@@ -53,4 +51,4 @@ Spoiler Tech - WhatsApp bot framework | Leaks | Tools
 https://spoiler.pairsite.space
 
 </div>
-Powered by spoiler
+Powered by stinger
