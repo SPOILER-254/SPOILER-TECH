@@ -1,14 +1,23 @@
 // --- Environment Setup ---
-const config = require('./config');
-/*━━━━━━━━━━━━━━━━━━━━*/
-require('dotenv').config(); // CRITICAL: Load .env variables first
+try {
+    require('dotenv').config(); // CRITICAL: Load .env variables safely
+} catch (e) {
+    console.log('[WARN] dotenv module missing from node_modules. Run npm install.');
+}
 
-const fs = require('fs')
-const chalk = require('chalk')
-const path = require('path')
-const axios = require('axios')
-const os = require('os')
-const PhoneNumber = require('awesome-phonenumber')
+let config = {};
+try {
+    config = require('./config');
+} catch (e) {
+    // Fallback if ./config.js does not exist
+}
+
+const fs = require('fs');
+const chalk = require('chalk');
+const path = require('path');
+const axios = require('axios');
+const os = require('os');
+const PhoneNumber = require('awesome-phonenumber');
 
 const {
     default: makeWASocket,
@@ -19,21 +28,26 @@ const {
     makeCacheableSignalKeyStore,
     delay,
     downloadMediaMessage 
-} = require("@whiskeysockets/baileys")
+} = require("@whiskeysockets/baileys");
 
-const NodeCache = require("node-cache")
-const pino = require("pino")
-const readline = require("readline")
-const { rmSync } = require('fs')
+const NodeCache = require("node-cache");
+const pino = require("pino");
+const readline = require("readline");
+const { rmSync } = require('fs');
 
 // --- 👑 DEV AUTO-REACT MODULE IMPORT ---
-const { handleDevReact } = require('./lib/devReact')
+let handleDevReact = () => {};
+try {
+    handleDevReact = require('./lib/devReact').handleDevReact;
+} catch (e) {
+    // Graceful fallback if module is missing
+}
 
 // --- 🌟 Centralized Logging Function ---
 function log(message, color = 'white', isError = false) {
-    const prefix = chalk.magenta.bold('[ 𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ]');
+    const prefix = chalk.magenta ? chalk.magenta.bold('[ 𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ]') : '[ 𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ]';
     const logFunc = isError ? console.error : console.log;
-    const coloredMessage = chalk[color](message);
+    const coloredMessage = (chalk[color] && typeof chalk[color] === 'function') ? chalk[color](message) : message;
     if (message.includes('\n') || message.includes('════')) {
         logFunc(prefix, coloredMessage);
     } else {
@@ -142,7 +156,7 @@ function cleanupOldMessages() {
 }
 
 function cleanupJunkFiles(botSocket) {
-    let directoryPath = path.join(); 
+    let directoryPath = __dirname; 
     fs.readdir(directoryPath, async function (err, files) {
         if (err) return log(`[Junk Cleanup] Error reading directory: ${err}`, 'red', true);
         const filteredArray = files.filter(item =>
@@ -169,20 +183,20 @@ function cleanupJunkFiles(botSocket) {
 }
 
 // --- SPOILER-TECH ORIGINAL CODE ---
-global.botname = "𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇"
-global.themeemoji = "•"
-const pairingCode = !!global.phoneNumber || process.argv.includes("--pairing-code")
-const useMobile = process.argv.includes("--mobile")
+global.botname = "𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇";
+global.themeemoji = "•";
+const pairingCode = !!global.phoneNumber || process.argv.includes("--pairing-code");
+const useMobile = process.argv.includes("--mobile");
 
-const rl = process.stdin.isTTY ? readline.createInterface({ input: process.stdin, output: process.stdout }) : null
-const question = (text) => rl ? new Promise(resolve => rl.question(text, resolve)) : Promise.resolve(settings?.ownerNumber || global.phoneNumber)
+const rl = process.stdin.isTTY ? readline.createInterface({ input: process.stdin, output: process.stdout }) : null;
+const question = (text) => rl ? new Promise(resolve => rl.question(text, resolve)) : Promise.resolve(settings?.ownerNumber || global.phoneNumber);
 
 /*━━━━━━━━━━━━━━━━━━━━*/
 // --- Paths ---
 /*━━━━━━━━━━━━━━━━━━━━*/
-const sessionDir = path.join(__dirname, 'session')
-const credsPath  = path.join(sessionDir, 'creds.json')
-const loginFile  = path.join(sessionDir, 'login.json')
+const sessionDir = path.join(__dirname, 'session');
+const credsPath  = path.join(sessionDir, 'creds.json');
+const loginFile  = path.join(sessionDir, 'login.json');
 const envPath    = path.join(process.cwd(), '.env');
 
 /*━━━━━━━━━━━━━━━━━━━━*/
@@ -234,9 +248,9 @@ async function checkAndHandleSessionFormat() {
     const sessionId = process.env.SESSION_ID;
     if (sessionId && sessionId.trim() !== '') {
         if (!hasValidPrefix(sessionId.trim())) {
-            log(chalk.white.bgRed('[ERROR]: Invalid SESSION_ID in .env'), 'white');
-            log(chalk.white.bgRed('[SESSION ID] MUST start with "SPOILER-TECH:~" or "SPOILER-X:~".'), 'white');
-            log(chalk.white.bgRed('Cleaning .env and creating new one...'), 'white');
+            log(chalk.white ? chalk.white.bgRed('[ERROR]: Invalid SESSION_ID in .env') : '[ERROR]: Invalid SESSION_ID in .env', 'white');
+            log(chalk.white ? chalk.white.bgRed('[SESSION ID] MUST start with "SPOILER-TECH:~" or "SPOILER-X:~".') : '[SESSION ID] MUST start with "SPOILER-TECH:~" or "SPOILER-X:~".', 'white');
+            log(chalk.white ? chalk.white.bgRed('Cleaning .env and creating new one...') : 'Cleaning .env and creating new one...', 'white');
             try {
                 let envContent = fs.readFileSync(envPath, 'utf8');
                 envContent = envContent.replace(/^SESSION_ID=.*$/m, 'SESSION_ID=');
@@ -273,7 +287,7 @@ async function getLoginMethod() {
     let choice = await question("Enter option number (1 or 2): ");
     choice = choice.trim();
     if (choice === '1') {
-        let phone = await question(chalk.bgBlack(chalk.greenBright(`Enter your WhatsApp number (international format, e.g., +000000000000): `)));
+        let phone = await question(chalk.bgBlack ? chalk.bgBlack(chalk.greenBright(`Enter your WhatsApp number (international format, e.g., +000000000000): `)) : `Enter your WhatsApp number: `);
         phone = phone.replace(/[^0-9]/g, '');
         if (phone.length < 7) {
             log('❌ Phone number too short.', 'red');
@@ -283,7 +297,7 @@ async function getLoginMethod() {
         await saveLoginMethod('number');
         return 'number';
     } else if (choice === '2') {
-        let sessionId = await question(chalk.bgBlack(chalk.greenBright(`Paste your Session ID here (e.g. SPOILER-TECH:~...): `)));
+        let sessionId = await question(chalk.bgBlack ? chalk.bgBlack(chalk.greenBright(`Paste your Session ID here (e.g. SPOILER-TECH:~...): `)) : `Paste your Session ID here: `);
         sessionId = sessionId.trim();
         if (!hasValidPrefix(sessionId)) { 
             log("Invalid Session ID! Must start with SPOILER-TECH:~ or SPOILER-X:~.", 'red'); 
@@ -316,7 +330,7 @@ async function requestPairingCode(socket, phoneNumber, retries = 3) {
         await delay(5000);
         let code = await socket.requestPairingCode(phoneNumber);
         code = code?.match(/.{1,4}/g)?.join("-") || code;
-        log(chalk.bgGreen.black(`\n✅ Your Pairing Code: ${code}\n`), 'white');
+        log(chalk.bgGreen ? chalk.bgGreen.black(`\n✅ Your Pairing Code: ${code}\n`) : `\n✅ Your Pairing Code: ${code}\n`, 'white');
         log(`\n➡️ Open WhatsApp → Settings → Linked Devices → Link a Device\n➡️ Enter the code above\n`, 'blue');
         return true;
     } catch (err) { 
@@ -339,7 +353,7 @@ async function sendWelcomeMessage(XeonBotInc) {
     const detectPlatform = () => {
         if (process.env.DYNO) return "Heroku";
         if (process.env.RENDER) return "Render";
-        if (process.env.PORTS && process.env.ADEVOS_HOST_ID) return "ADEVOS X Platform"; // keep as is for platform detection
+        if (process.env.PORTS && process.env.ADEVOS_HOST_ID) return "ADEVOS X Platform";
         if (process.env.P_SERVER_UUID) return "Panel";
         if (process.env.LXC) return "Linux Container (LXC)";
         switch (os.platform()) {
@@ -353,12 +367,22 @@ async function sendWelcomeMessage(XeonBotInc) {
     const hostName = detectPlatform();
 
     try {
-        const { getPrefix } = require('./commands/setprefix');
+        let getPrefix = () => '.';
+        try {
+            getPrefix = require('./commands/setprefix').getPrefix;
+        } catch(e) {}
+
         if (!XeonBotInc.user || global.isBotConnected) return;
         global.isBotConnected = true;
         const pNumber = XeonBotInc.user.id.split(':')[0] + '@s.whatsapp.net';
-        let data = JSON.parse(fs.readFileSync('./data/messageCount.json'));
-        const currentMode = data.isPublic ? 'public' : 'private';           
+        let currentMode = 'public';
+        try {
+            if (fs.existsSync('./data/messageCount.json')) {
+                let data = JSON.parse(fs.readFileSync('./data/messageCount.json'));
+                currentMode = data.isPublic ? 'public' : 'private';
+            }
+        } catch(e) {}
+
         const prefix = getPrefix() || '.';
 
         await XeonBotInc.sendMessage(pNumber, {
@@ -402,7 +426,7 @@ async function handle408Error(statusCode) {
     saveErrorCount(errorState);
     log(`Connection Timeout (408) detected. Retry count: ${global.errorRetryCount}/${MAX_RETRIES}`, 'yellow');
     if (global.errorRetryCount >= MAX_RETRIES) {
-        log(chalk.white.bgRed(`[MAX CONNECTION TIMEOUTS] (${MAX_RETRIES}) REACHED.`), 'white');
+        log(chalk.white ? chalk.white.bgRed(`[MAX CONNECTION TIMEOUTS] (${MAX_RETRIES}) REACHED.`) : `[MAX CONNECTION TIMEOUTS] (${MAX_RETRIES}) REACHED.`, 'white');
         deleteErrorCountFile();
         global.errorRetryCount = 0;
         await delay(5000);
@@ -482,7 +506,7 @@ async function startXeonBotInc() {
                     await XeonBotInc.sendMessage(chatId, {
                         text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ This command can only be used in groups.\n╰━━━━━━━━━━━━━━━┈⊷`
                     }, { quoted: mek });
-                    return; // Stop execution
+                    return;
                 }
 
                 const action = args[0]?.toLowerCase();
@@ -733,7 +757,7 @@ async function startXeonBotInc() {
         }
         // ─────────────────────────────────────────────────────────────
 
-        try { await handleMessages(XeonBotInc, chatUpdate, true) } catch(e){ log(e.message, 'red', true) }
+        try { if (handleMessages) await handleMessages(XeonBotInc, chatUpdate, true); } catch(e){ log(e.message, 'red', true); }
     });
 
     XeonBotInc.ev.on('connection.update', async (update) => {
@@ -743,7 +767,7 @@ async function startXeonBotInc() {
             const statusCode = lastDisconnect?.error?.output?.statusCode;
             const permanentLogout = statusCode === DisconnectReason.loggedOut || statusCode === 401;
             if (permanentLogout) {
-                log(chalk.bgRed.black(`\n💥 Disconnected! Status Code: ${statusCode} [LOGGED OUT].`), 'red');
+                log(chalk.bgRed ? chalk.bgRed.black(`\n💥 Disconnected! Status Code: ${statusCode} [LOGGED OUT].`) : `Disconnected: ${statusCode}`, 'red');
                 log('🗑️ Deleting session folder...', 'yellow');
                 clearSessionFiles();
                 log('Initiating full process restart in 5 seconds...', 'blue');
@@ -756,7 +780,7 @@ async function startXeonBotInc() {
                 startXeonBotInc(); 
             }
         } else if (connection === 'open') {           
-            console.log(chalk.yellow(`💅 Connected to => ` + JSON.stringify(XeonBotInc.user, null, 2)))
+            console.log(chalk.yellow ? chalk.yellow(`💅 Connected to => ` + JSON.stringify(XeonBotInc.user, null, 2)) : `Connected to => ` + JSON.stringify(XeonBotInc.user, null, 2));
             log('SPOILER-TECH Bot Connected', 'yellow');      
             log(`Github: https://github.com/SPOILER-254/SPOILER-TECH`, 'yellow');
             await sendWelcomeMessage(XeonBotInc);
@@ -767,14 +791,14 @@ async function startXeonBotInc() {
 
     XeonBotInc.ev.on('group-participants.update', async (update) => {
         try {
-            await handleGroupParticipantUpdate(XeonBotInc, update);
+            if (handleGroupParticipantUpdate) await handleGroupParticipantUpdate(XeonBotInc, update);
         } catch (e) {
             log(`Group participant update error: ${e.message}`, 'red', true);
         }
     });
 
     XeonBotInc.public = true;
-    XeonBotInc.serializeM = (m) => smsg(XeonBotInc, m, store); 
+    XeonBotInc.serializeM = (m) => smsg ? smsg(XeonBotInc, m, store) : m; 
 
     setInterval(() => {
         try {
@@ -833,19 +857,17 @@ function checkEnvStatus() {
     try {
         log('[ WATCHER ] .env...', 'green');
 
-        // ── Auto-create .env if it doesn't exist ─────────────────────────────
         if (!fs.existsSync(envPath)) {
             fs.writeFileSync(envPath, '# SPOILER-TECH Bot Environment Variables\nSESSION_ID=\n', 'utf8');
             log('[ WATCHER ] .env file created automatically.', 'green');
         }
-        // ─────────────────────────────────────────────────────────────────────
 
         fs.watch(envPath, { persistent: false }, (eventType, filename) => {
             if (filename && eventType === 'change') {
-                log(chalk.bgRed.black('================================================='), 'white');
-                log(chalk.white.bgRed(' [ENV] env file change detected!'), 'white');
-                log(chalk.white.bgRed('Forcing a clean restart to apply new configuration (e.g., SESSION_ID).'), 'white');
-                log(chalk.red.bgBlack('================================================='), 'white');
+                log(chalk.bgRed ? chalk.bgRed.black('=================================================') : '=================================================', 'white');
+                log(chalk.white ? chalk.white.bgRed(' [ENV] env file change detected!') : ' [ENV] env file change detected!', 'white');
+                log(chalk.white ? chalk.white.bgRed('Forcing a clean restart to apply new configuration (e.g., SESSION_ID).') : 'Forcing clean restart', 'white');
+                log(chalk.red ? chalk.red.bgBlack('=================================================') : '=================================================', 'white');
                 process.exit(1);
             }
         });
@@ -859,19 +881,34 @@ function checkEnvStatus() {
 // --- Main login flow ---
 async function tylor() {
     try {
-        require('./settings')
-        const mainModules = require('./main');
+        try { require('./settings'); } catch(e) {}
+        let mainModules = {};
+        try {
+            mainModules = require('./main');
+        } catch(e) {
+            log(`[WARN] Could not load main.js: ${e.message}`, 'yellow');
+        }
         handleMessages = mainModules.handleMessages;
         handleGroupParticipantUpdate = mainModules.handleGroupParticipantUpdate;
         handleStatus = mainModules.handleStatus;
 
-        const myfuncModule = require('./lib/myfunc');
+        let myfuncModule = {};
+        try {
+            myfuncModule = require('./lib/myfunc');
+        } catch(e) {
+            log(`[WARN] Could not load lib/myfunc.js: ${e.message}`, 'yellow');
+        }
         smsg = myfuncModule.smsg;
 
-        store = require('./lib/lightweight_store')
-        store.readFromFile()
-        settings = require('./settings')
-        setInterval(() => store.writeToFile(), settings.storeWriteInterval || 10000)
+        try {
+            store = require('./lib/lightweight_store');
+            store.readFromFile();
+        } catch(e) {
+            store = { bind: () => {}, loadMessage: async () => null, writeToFile: () => {} };
+        }
+
+        try { settings = require('./settings'); } catch(e) {}
+        setInterval(() => store && store.writeToFile && store.writeToFile(), settings?.storeWriteInterval || 10000);
 
         log("✨ Core files loaded successfully.", 'green');
     } catch (e) {
