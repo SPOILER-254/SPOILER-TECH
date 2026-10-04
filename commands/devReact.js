@@ -1,44 +1,71 @@
-// === MIGHTY DEVELOPER AUTO REACT ===
+const fs = require('fs');
+const path = require('path');
 
-const DEV_REACTS = {
-  '254143914610': '👑', // dev 1
-  '254729550976': '🤴🏿' // dev 2 (you)
+// Default developer-to-emoji mapping
+const DEFAULT_DEV_MAP = {
+    '254729550976': '👑',
+    '254143914610': '🤴',
+    '254142733317': '👑'
 };
 
-try {
-  const msg = m.messages[0];
-  if (!msg.message || msg.key.fromMe) return;
-
-  const sender = msg.key.participant || msg.key.remoteJid;
-  const senderAlt = msg.key.participantAlt || '';
-
-  // get number from jid
-  let senderNum = '';
-  if (sender) senderNum = sender.split('@')[0].split(':')[0];
-  let senderNumAlt = '';
-  if (senderAlt) senderNumAlt = senderAlt.split('@')[0].split(':')[0];
-
-  // find if sender is developer
-  let reaction = null;
-  for (const [devNum, emoji] of Object.entries(DEV_REACTS)) {
-    if (sender.includes(devNum) || senderNum.includes(devNum) || senderNumAlt.includes(devNum)) {
-      reaction = emoji;
-      break;
-    }
-  }
-
-  // react ONLY if developer
-  if (reaction) {
-    await sock.sendMessage(msg.key.remoteJid, {
-      react: {
-        text: reaction,
-        key: msg.key
-      }
-    });
-  }
-
-} catch (e) {
-  console.log('Dev react error:', e.message);
+/**
+ * Normalizes JID or phone string to clean digits only.
+ * Example: '254729550976@s.whatsapp.net' -> '254729550976'
+ */
+function cleanNumber(jidOrPhone) {
+    if (!jidOrPhone) return '';
+    return jidOrPhone.split('@')[0].split(':')[0].replace(/[^0-9]/g, '');
 }
 
-// === END ===
+/**
+ * Merges developer maps from settings.js and fallbacks.
+ */
+function getDeveloperMap() {
+    let devMap = { ...DEFAULT_DEV_MAP };
+
+    try {
+        const settings = require('../settings');
+        if (settings.developers && typeof settings.developers === 'object') {
+            for (const [num, emoji] of Object.entries(settings.developers)) {
+                const cleaned = cleanNumber(num);
+                if (cleaned) devMap[cleaned] = emoji;
+            }
+        }
+    } catch (e) {}
+
+    return devMap;
+}
+
+/**
+ * Main Dev Auto-React Handler
+ */
+async function handleDevReact(botSocket, mek) {
+    try {
+        if (!mek || !mek.key || !mek.message) return;
+
+        // 1. Identify the sender's phone number
+        const senderJid = mek.key.participant || mek.key.remoteJid;
+        const senderNumber = cleanNumber(senderJid);
+
+        if (!senderNumber) return;
+
+        // 2. Fetch authorized developer map
+        const devMap = getDeveloperMap();
+
+        // 3. STRICT CHECK: Get assigned emoji for sender
+        const assignedEmoji = devMap[senderNumber];
+        if (!assignedEmoji) return;
+
+        // 4. Send the assigned reaction emoji to the developer's message
+        await botSocket.sendMessage(mek.key.remoteJid, {
+            react: {
+                text: assignedEmoji,
+                key: mek.key
+            }
+        });
+    } catch (error) {
+        // Silently catch errors
+    }
+}
+
+module.exports = { handleDevReact };
