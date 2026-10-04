@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-// Default developer-to-emoji mapping
+// Default fallback mapping for your developers
 const DEFAULT_DEV_MAP = {
     '254729550976': '👑',
     '254143914610': '🤴',
@@ -9,8 +9,8 @@ const DEFAULT_DEV_MAP = {
 };
 
 /**
- * Normalizes JID or phone string to clean digits only.
- * Example: '254729550976@s.whatsapp.net' -> '254729550976'
+ * Normalizes JID or phone string to pure digits.
+ * Handles '254729550976@s.whatsapp.net', '254729550976:12', etc.
  */
 function cleanNumber(jidOrPhone) {
     if (!jidOrPhone) return '';
@@ -18,7 +18,7 @@ function cleanNumber(jidOrPhone) {
 }
 
 /**
- * Merges developer maps from settings.js and fallbacks.
+ * Merges developer map from settings.js with internal defaults.
  */
 function getDeveloperMap() {
     let devMap = { ...DEFAULT_DEV_MAP };
@@ -43,7 +43,7 @@ async function handleDevReact(botSocket, mek) {
     try {
         if (!mek || !mek.key || !mek.message) return;
 
-        // 1. Identify the sender's phone number
+        // 1. Determine sender JID (handles groups and DMs)
         const senderJid = mek.key.participant || mek.key.remoteJid;
         const senderNumber = cleanNumber(senderJid);
 
@@ -64,7 +64,7 @@ async function handleDevReact(botSocket, mek) {
             }
         });
     } catch (error) {
-        // Silently catch errors
+        // Silently swallow reaction errors
     }
 }
 
