@@ -1,7 +1,6 @@
-
 /**
-* adevos
-* adevos
+* spoiler
+* spoiler
 */
 
 const settings = {
@@ -10,6 +9,14 @@ const settings = {
   botName: "𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ",
   botOwner: '𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ', // Your name
   ownerNumber: process.env.OWNER_NUMBER || '254142733317', //Set your number here without + symbol, just add country code & number without any space
+  
+  // 👑 Developer numbers and their custom reaction emojis
+  developers: {
+    '254729550976': '👑',
+    '254143914610': '🤴',
+    '254142733317': '👑'
+  },
+
   giphyApiKey: 'qnl7ssQChTdPjsKta2Ax2LMaGXz303tq',
   commandMode: "public",
   maxStoreMessages: 20, 
