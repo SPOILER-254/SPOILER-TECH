@@ -52,4 +52,4 @@ Spoiler Tech - WhatsApp bot framework | Leaks | Tools
 https://spoiler.pairsite.space
 
 </div>
-Powered by stinger
+                                      Powered by stinger
