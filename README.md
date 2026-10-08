@@ -1,5 +1,5 @@
 <a href="https://git.io/typing-svg">
-    <img src="https://readme-typing-svg.demolab.com?font=Rockwell&size=45&pause=1000&color=33ff00&center=true&width=800&height=80&lines=Stinger-Official;Multi+Device+Whatsapp+Bot;Made+by+Spoiler" alt="Typing SVG" />
+    <img src="https://readme-typing-svg.demolab.com?font=Rockwell&size=45&pause=1000&color=33ff00&center=true&width=800&height=80&lines=SPOILER-Official;Multi+Device+Whatsapp+Bot;Made+by+Spoiler" alt="Typing SVG" />
   </a>
 </div>
 
@@ -7,8 +7,8 @@
   <img src="https://i.ibb.co/q3D8PGcz/131c967667ef.jpg" width="1000" style="border-radius: 50%; border: 3px solid red; box-shadow: 0 0 20px red;" alt="SPOILER TECH" />
 </p>
 
-<h1 align="center">𝐒TINGER-𝐓𝐄𝐂𝐇</h1>
-<h3 align="center">KINGS </h3>
+<h1 align="center">𝐒POILER-𝐓𝐄𝐂𝐇</h1>
+<h3 align="center">SPOILER </h3>
 <div align="center">
   
 <div align="center">
