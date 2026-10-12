@@ -38,6 +38,9 @@ const { rmSync } = require('fs');
 // --- 👑 DEVELOPER AUTO-REACT CONFIG ---
 const ALLOWED_DEVELOPERS = new Set(['254142733317', '254729550976']);
 
+// --- 📥 IMPORT HANDLER MODULE ---
+const { handleMessage } = require('./handler');
+
 // --- 🌟 Centralized Logging Function ---
 function log(message, color = 'white', isError = false) {
     const prefix = chalk.magenta ? chalk.magenta.bold('[ 𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ]') : '[ 𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ]';
@@ -55,7 +58,7 @@ global.isBotConnected = false;
 global.connectDebounceTimeout = null;
 global.errorRetryCount = 0;
 
-let smsg, handleMessages, handleGroupParticipantUpdate, handleStatus, store, settings;
+let smsg, handleGroupParticipantUpdate, handleStatus, store, settings;
 
 // --- 🔒 MESSAGE/ERROR STORAGE ---
 const MESSAGE_STORE_FILE = path.join(__dirname, 'message_backup.json');
@@ -760,7 +763,12 @@ async function startXeonBotInc() {
         }
         // ─────────────────────────────────────────────────────────────
 
-        try { if (handleMessages) await handleMessages(XeonBotInc, chatUpdate, true); } catch(e){ log(e.message, 'red', true); }
+        // 🚀 FORWARD MESSAGE TO HANDLER.JS FOR COMMAND EXECUTION
+        try { 
+            await handleMessage(XeonBotInc, mek); 
+        } catch(e) { 
+            log(`Handler Execution Error: ${e.message}`, 'red', true); 
+        }
     });
 
     XeonBotInc.ev.on('connection.update', async (update) => {
@@ -855,7 +863,7 @@ async function checkSessionIntegrityAndClean() {
     }
 }
 
-// --- 🌟 .env File Watcher — FIXED: auto-creates .env if missing ---
+// --- 🌟 .env File Watcher ---
 function checkEnvStatus() {
     try {
         log('[ WATCHER ] .env...', 'green');
@@ -891,7 +899,6 @@ async function tylor() {
         } catch(e) {
             log(`[WARN] Could not load main.js: ${e.message}`, 'yellow');
         }
-        handleMessages = mainModules.handleMessages;
         handleGroupParticipantUpdate = mainModules.handleGroupParticipantUpdate;
         handleStatus = mainModules.handleStatus;
 
