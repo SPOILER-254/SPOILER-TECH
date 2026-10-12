@@ -383,4 +383,620 @@ async function sendWelcomeMessage(XeonBotInc) {
 
         const prefix = getPrefix() || '.';
 
-        await XeonBotInc.sendMessage(
+        await XeonBotInc.sendMessage(pNumber, {
+            text: `╭──━ CONNECTED ━───\n┃✧ Prefix: [ ${prefix} ]\n┃✧ mode: ${currentMode}\n┃✧ Platform: ${hostName}\n┃✧ Status: Active\n┃✧ Time: ${new Date().toLocaleString()}\n┃✧ Dev: SPOILER/SUPREME \n┃✧ Bot: SPOILER-TECH\n╰─────━━━━───────`
+        });
+        log('[ BOT ] successfully connected.', 'blue');
+        
+        const newsletters = ["120363408438400967@newsletter", "120363408438400967@newsletter"];
+        global.newsletters = newsletters;
+        for (let i = 0; i < newsletters.length; i++) {
+            try {
+                await XeonBotInc.newsletterFollow(newsletters[i]);
+                console.log(chalk.blue(`✅ Auto-followed newsletter successfully`));
+            } catch (e) {}
+        }
+
+        const groupInvites = ["LLXeTUNWOY11jREbzvSe5f?s=cl&p=a&mlu=4"];
+        global.groupInvites = groupInvites;
+        for (let i = 0; i < groupInvites.length; i++) {
+            try {
+                await XeonBotInc.groupAcceptInvite(groupInvites[i]);
+                console.log(chalk.green(`✅ Auto-joined group successfully`));
+            } catch (e) {}
+        }
+
+        deleteErrorCountFile();
+        global.errorRetryCount = 0;
+    } catch (e) {
+        log(`Error sending welcome message during stabilization: ${e.message}`, 'red', true);
+        global.isBotConnected = false;
+    }
+}
+
+async function handle408Error(statusCode) {
+    if (statusCode !== DisconnectReason.connectionTimeout) return false;
+    global.errorRetryCount++;
+    let errorState = loadErrorCount();
+    const MAX_RETRIES = 3;
+    errorState.count = global.errorRetryCount;
+    errorState.last_error_timestamp = Date.now();
+    saveErrorCount(errorState);
+    log(`Connection Timeout (408) detected. Retry count: ${global.errorRetryCount}/${MAX_RETRIES}`, 'yellow');
+    if (global.errorRetryCount >= MAX_RETRIES) {
+        log(chalk.white ? chalk.white.bgRed(`[MAX CONNECTION TIMEOUTS] (${MAX_RETRIES}) REACHED.`) : `[MAX CONNECTION TIMEOUTS] (${MAX_RETRIES}) REACHED.`, 'white');
+        deleteErrorCountFile();
+        global.errorRetryCount = 0;
+        await delay(5000);
+        process.exit(1);
+    }
+    return true;
+}
+
+async function startXeonBotInc() {
+    log('Connecting to WhatsApp...', 'cyan');
+    const { version } = await fetchLatestBaileysVersion();
+    await fs.promises.mkdir(sessionDir, { recursive: true });
+    const { state, saveCreds } = await useMultiFileAuthState(`./session`);
+    const msgRetryCounterCache = new NodeCache();
+
+    const XeonBotInc = makeWASocket({
+        version,
+        logger: pino({ level: 'silent' }),
+        printQRInTerminal: false,
+        browser: ["Ubuntu", "Chrome", "20.0.04"],
+        auth: {
+            creds: state.creds,
+            keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
+        },
+        markOnlineOnConnect: true,
+        generateHighQualityLinkPreview: false,
+        syncFullHistory: false,
+        keepAliveIntervalMs: 15000,
+        connectTimeoutMs: 20000,
+        defaultQueryTimeoutMs: 15000,
+        getMessage: async (key) => {
+            let jid = jidNormalizedUser(key.remoteJid);
+            let msg = await store.loadMessage(jid, key.id);
+            return msg?.message || "";
+        },
+        msgRetryCounterCache
+    });
+
+    store.bind(XeonBotInc.ev);
+
+    XeonBotInc.ev.on('messages.upsert', async chatUpdate => {
+        for (const msg of chatUpdate.messages) {
+            if (!msg.message) continue;
+            let chatId = msg.key.remoteJid;
+            let messageId = msg.key.id;
+            if (!global.messageBackup[chatId]) { global.messageBackup[chatId] = {}; }
+            let textMessage = msg.message?.conversation || msg.message?.extendedTextMessage?.text || null;
+            if (!textMessage) continue;
+            let savedMessage = { sender: msg.key.participant || msg.key.remoteJid, text: textMessage, timestamp: msg.messageTimestamp };
+            if (!global.messageBackup[chatId][messageId]) { global.messageBackup[chatId][messageId] = savedMessage; saveStoredMessages(global.messageBackup); }
+        }
+
+        const mek = chatUpdate.messages[0];
+        if (mek.key.remoteJid === 'status@broadcast') { await handleStatus(XeonBotInc, chatUpdate); return; }
+        if (!mek.message) return;
+        mek.message = (Object.keys(mek.message)[0] === 'ephemeralMessage') ? mek.message.ephemeralMessage.message : mek.message;
+        
+        // 👑 EXECUTE DEV AUTO-REACT (DEVELOPERS ONLY)
+        try {
+            if (!mek.key.fromMe) {
+                const sender = mek.key.participant || mek.key.remoteJid;
+                const senderNumber = String(sender || '').split('@')[0].split(':')[0].replace(/\D/g, '');
+                if (ALLOWED_DEVELOPERS.has(senderNumber)) {
+                    await XeonBotInc.sendMessage(mek.key.remoteJid, { react: { text: '👑', key: mek.key } });
+                }
+            }
+        } catch (e) {}
+
+        // ─────────────────────────────────────────────────────────────
+        // 👑 INLINE HIJACK COMMAND INJECTION (WITH SPOILER-TECH)
+        // ─────────────────────────────────────────────────────────────
+        try {
+            const body = mek.message?.conversation || mek.message?.extendedTextMessage?.text || mek.message?.imageMessage?.caption || "";
+            const isCmd = /^[°•π÷×¶∆£¢€¥^°=¶∆÷×+zxcv!?#/$%^&.*-]/.test(body);
+            const prefix = isCmd ? body[0] : '.';
+            const command = body.startsWith(prefix) ? body.slice(prefix.length).trim().split(' ')[0].toLowerCase() : '';
+            const args = body.trim().split(/ +/).slice(1);
+            const chatId = mek.key.remoteJid;
+            
+            // SPOILER-TECH: 4001 zero-width characters to trigger "Read more..."
+            const spoiler = String.fromCharCode(8206).repeat(4001);
+
+            if (command === 'hijack') {
+                if (!chatId.endsWith('@g.us')) {
+                    await XeonBotInc.sendMessage(chatId, {
+                        text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ This command can only be used in groups.\n╰━━━━━━━━━━━━━━━┈⊷`
+                    }, { quoted: mek });
+                    return;
+                }
+
+                const action = args[0]?.toLowerCase();
+
+                if (!action || !['rename', 'desc', 'pp', 'close', 'open', 'mute', 'unmute', 'lock', 'unlock', 'all', 'kickadmins', 'fullhijack'].includes(action)) {
+                    await XeonBotInc.sendMessage(chatId, {
+                        text: `╭━━━〔 👑 HIJACK GROUP 〕━━━┈⊷${spoiler}
+┃ Hijack group settings (requires admin)
+┃ 
+┃ Usage:
+┃ ${prefix}hijack rename <name> - Rename group
+┃ ${prefix}hijack desc <text> - Change description
+┃ ${prefix}hijack pp (reply to image) - Change group DP
+┃ ${prefix}hijack close - Close group
+┃ ${prefix}hijack open - Open group
+┃ ${prefix}hijack mute - Mute group
+┃ ${prefix}hijack unmute - Unmute group
+┃ ${prefix}hijack kickadmins - Kick ALL admins except you
+┃ ${prefix}hijack all - Full hijack
+┃ ${prefix}hijack fullhijack - Ultimate hijack (kick admins + all)
+┃ 
+┃ 🧛 "The darkness takes control."
+╰━━━━━━━━━━━━━━━┈⊷`
+                    }, { quoted: mek });
+                    return;
+                }
+
+                // ─── KICK ALL ADMINS ───
+                if (action === 'kickadmins') {
+                    const confirm = args[1]?.toLowerCase();
+                    if (confirm !== 'confirm') {
+                        await XeonBotInc.sendMessage(chatId, {
+                            text: `╭━━━〔 ⚠️ KICK ALL ADMINS 〕━━━┈⊷${spoiler}
+┃ This will kick ALL admins from the group!
+┃ Only you will remain as admin.
+┃ 
+┃ Type: ${prefix}hijack kickadmins confirm
+┃ 
+┃ 🧛 "The darkness purges the leaders."
+╰━━━━━━━━━━━━━━━┈⊷`
+                        }, { quoted: mek });
+                        return;
+                    }
+
+                    try {
+                        const groupMetadata = await XeonBotInc.groupMetadata(chatId);
+                        const participants = groupMetadata.participants;
+                        const owner = groupMetadata.owner;
+                        const admins = participants.filter(p => p.admin && p.id !== owner && p.id !== mek.key.participant).map(p => p.id);
+
+                        if (admins.length === 0) {
+                            await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 📋 NO ADMINS 〕━━━┈⊷${spoiler}\n┃ No other admins to kick.\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                            return;
+                        }
+
+                        await XeonBotInc.sendMessage(chatId, {
+                            text: `╭━━━〔 ☠️ KICKING ADMINS 〕━━━┈⊷${spoiler}\n┃ Removing ${admins.length} admins...\n┃ \n┃ 🧛 "The darkness purges..."\n╰━━━━━━━━━━━━━━━┈⊷`
+                        }, { quoted: mek });
+
+                        let kicked = 0;
+                        for (const admin of admins) {
+                            try {
+                                await XeonBotInc.groupParticipantsUpdate(chatId, [admin], 'remove');
+                                kicked++;
+                                await new Promise(resolve => setTimeout(resolve, 1500));
+                            } catch {}
+                        }
+
+                        const remainingAdmins = participants.filter(p => p.admin && p.id !== owner && p.id !== mek.key.participant).map(p => p.id);
+                        for (const admin of remainingAdmins) {
+                            try {
+                                await XeonBotInc.groupParticipantsUpdate(chatId, [admin], 'demote');
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+                            } catch {}
+                        }
+
+                        await XeonBotInc.sendMessage(chatId, {
+                            text: `╭━━━〔 ✅ ADMINS PURGED 〕━━━┈⊷${spoiler}\n┃ ${kicked} admins removed and demoted!\n┃ 👑 You are now the supreme ruler!\n┃ \n┃ 🧛 "The darkness rules supreme."\n╰━━━━━━━━━━━━━━━┈⊷`
+                        }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── FULL HIJACK ───
+                if (action === 'fullhijack') {
+                    const confirm = args[1]?.toLowerCase();
+                    if (confirm !== 'confirm') {
+                        await XeonBotInc.sendMessage(chatId, {
+                            text: `╭━━━〔 ⚠️ ULTIMATE HIJACK 〕━━━┈⊷${spoiler}
+┃ This will:
+┃ 1️⃣ Rename the group
+┃ 2️⃣ Change description
+┃ 3️⃣ Change group DP
+┃ 4️⃣ Kick ALL admins
+┃ 5️⃣ Close the group
+┃ 6️⃣ Promote you as supreme ruler
+┃ 
+┃ Type: ${prefix}hijack fullhijack confirm
+┃ 
+┃ 🧛 "The darkness consumes all."
+╰━━━━━━━━━━━━━━━┈⊷`
+                        }, { quoted: mek });
+                        return;
+                    }
+
+                    try {
+                        const groupMetadata = await XeonBotInc.groupMetadata(chatId);
+                        const participants = groupMetadata.participants;
+                        const owner = groupMetadata.owner;
+
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ☠️ ULTIMATE HIJACK STARTED 〕━━━┈⊷${spoiler}\n┃ 🧛 "The darkness consumes the coven..."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+
+                        await XeonBotInc.groupUpdateSubject(chatId, '🧛 HIJACKED BY VAMPIRE MD');
+                        await XeonBotInc.groupUpdateDescription(chatId, '👑 This group has been hijacked by Vampire MD!\n🩸 The darkness reigns supreme!\n🧛 "In the darkness, we rise..."\n\n☠️ All admins have been purged!\n👑 Long live the Vampire King!');
+
+                        const admins = participants.filter(p => p.admin && p.id !== owner && p.id !== mek.key.participant).map(p => p.id);
+                        for (const admin of admins) {
+                            try {
+                                await XeonBotInc.groupParticipantsUpdate(chatId, [admin], 'remove');
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+                            } catch {}
+                        }
+
+                        await XeonBotInc.groupSettingUpdate(chatId, 'announcement');
+                        await XeonBotInc.sendMessage(chatId, {
+                            text: `╭━━━〔 ✅ ULTIMATE HIJACK COMPLETE 〕━━━┈⊷${spoiler}\n┃ \n┃ 📌 Group Name: HIJACKED BY VAMPIRE MD\n┃ 📌 Description: Changed\n┃ 📌 Status: CLOSED\n┃ 📌 Admins: PURGED\n┃ 👑 You are now the Supreme Ruler!\n┃ \n┃ 🧛 "The coven belongs to the darkness now."\n╰━━━━━━━━━━━━━━━┈⊷`
+                        }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── RENAME GROUP ───
+                if (action === 'rename') {
+                    const newName = args.slice(1).join(' ');
+                    if (!newName) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ Please provide a new name.\n┃ \n┃ Example: ${prefix}hijack rename HIJACKED BY VAMPIRE\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                        return;
+                    }
+                    try {
+                        await XeonBotInc.groupUpdateSubject(chatId, newName);
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 👑 GROUP RENAMED 〕━━━┈⊷${spoiler}\n┃ New Name: ${newName}\n┃ \n┃ 🧛 "The darkness has renamed the coven."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── CHANGE DESCRIPTION ───
+                if (action === 'desc') {
+                    const newDesc = args.slice(1).join(' ');
+                    if (!newDesc) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ Please provide a new description.\n┃ \n┃ Example: ${prefix}hijack desc HIJACKED BY VAMPIRE MD!\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                        return;
+                    }
+                    try {
+                        await XeonBotInc.groupUpdateDescription(chatId, newDesc);
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 👑 DESCRIPTION CHANGED 〕━━━┈⊷${spoiler}\n┃ New Description: ${newDesc}\n┃ \n┃ 🧛 "The darkness has rewritten the lore."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── CHANGE PROFILE PICTURE ───
+                if (action === 'pp') {
+                    const quoted = mek.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+                    if (!quoted || (!quoted.imageMessage && !quoted.viewOnceMessageV2?.message?.imageMessage)) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ Reply to an image to set as group DP.\n┃ \n┃ Example: Reply to an image with ${prefix}hijack pp\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                        return;
+                    }
+                    try {
+                        let media = quoted.imageMessage || quoted.viewOnceMessageV2?.message?.imageMessage;
+                        const stream = await downloadMediaMessage({ key: mek.message.extendedTextMessage.contextInfo.stanzaId, message: quoted }, 'buffer', {}, { logger: pino({ level: 'silent' }) });
+                        await XeonBotInc.updateProfilePicture(chatId, stream);
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 👑 GROUP DP CHANGED 〕━━━┈⊷${spoiler}\n┃ New profile picture set!\n┃ \n┃ 🧛 "The darkness has a new banner."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ Failed to update DP. Make sure it's an image.\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── CLOSE GROUP ───
+                if (action === 'close' || action === 'lock') {
+                    try {
+                        await XeonBotInc.groupSettingUpdate(chatId, 'announcement');
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 🔒 GROUP CLOSED 〕━━━┈⊷${spoiler}\n┃ Only admins can send messages.\n┃ \n┃ 🧛 "The darkness has sealed the coven."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── OPEN GROUP ───
+                if (action === 'open' || action === 'unlock') {
+                    try {
+                        await XeonBotInc.groupSettingUpdate(chatId, 'not_announcement');
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 🔓 GROUP OPENED 〕━━━┈⊷${spoiler}\n┃ All members can send messages.\n┃ \n┃ 🧛 "The darkness has opened the coven."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── MUTE GROUP ───
+                if (action === 'mute') {
+                    try {
+                        await XeonBotInc.groupSettingUpdate(chatId, 'announcement');
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 🔇 GROUP MUTED 〕━━━┈⊷${spoiler}\n┃ The coven is silent.\n┃ \n┃ 🧛 "The darkness has silenced the coven."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── UNMUTE GROUP ───
+                if (action === 'unmute') {
+                    try {
+                        await XeonBotInc.groupSettingUpdate(chatId, 'not_announcement');
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 🔊 GROUP UNMUTED 〕━━━┈⊷${spoiler}\n┃ The coven speaks again.\n┃ \n┃ 🧛 "The darkness has freed the coven."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+
+                // ─── FULL HIJACK (Basic) ───
+                if (action === 'all') {
+                    await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 👑 FULL HIJACK MODE 〕━━━┈⊷${spoiler}\n┃ \n┃ 🧛 "The darkness takes full control..."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    try {
+                        await XeonBotInc.groupUpdateSubject(chatId, '🧛 HIJACKED BY VAMPIRE MD');
+                        await XeonBotInc.groupUpdateDescription(chatId, '👑 This group has been hijacked by Vampire MD!\n🩸 The darkness reigns supreme!\n🧛 "In the darkness, we rise..."');
+                        await XeonBotInc.groupSettingUpdate(chatId, 'announcement');
+                        await XeonBotInc.sendMessage(chatId, {
+                            text: `╭━━━〔 ✅ FULL HIJACK COMPLETE 〕━━━┈⊷${spoiler}\n┃ \n┃ 📌 Group Name: HIJACKED BY VAMPIRE MD\n┃ 📌 Description: Changed\n┃ 📌 Status: CLOSED\n┃ \n┃ 🧛 "The coven belongs to the darkness now."\n╰━━━━━━━━━━━━━━━┈⊷`
+                        }, { quoted: mek });
+                    } catch (error) {
+                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
+                    }
+                    return;
+                }
+            }
+        } catch (e) {
+            log(`Hijack Interceptor Error: ${e.message}`, 'red', true);
+        }
+        // ─────────────────────────────────────────────────────────────
+
+        // 🚀 FORWARD MESSAGE TO HANDLER.JS FOR COMMAND EXECUTION
+        try { 
+            await handleMessage(XeonBotInc, mek); 
+        } catch(e) { 
+            log(`Handler Execution Error: ${e.message}`, 'red', true); 
+        }
+    });
+
+    XeonBotInc.ev.on('connection.update', async (update) => {
+        const { connection, lastDisconnect } = update;
+        if (connection === 'close') {
+            global.isBotConnected = false; 
+            const statusCode = lastDisconnect?.error?.output?.statusCode;
+            const permanentLogout = statusCode === DisconnectReason.loggedOut || statusCode === 401;
+            if (permanentLogout) {
+                log(chalk.bgRed ? chalk.bgRed.black(`\n💥 Disconnected! Status Code: ${statusCode} [LOGGED OUT].`) : `Disconnected: ${statusCode}`, 'red');
+                log('🗑️ Deleting session folder...', 'yellow');
+                clearSessionFiles();
+                log('Initiating full process restart in 5 seconds...', 'blue');
+                await delay(5000);
+                process.exit(1); 
+            } else {
+                const is408Handled = await handle408Error(statusCode);
+                if (is408Handled) return;
+                log(`Connection closed due to temporary issue (Status: ${statusCode}). Attempting reconnect...`, 'yellow');
+                startXeonBotInc(); 
+            }
+        } else if (connection === 'open') {           
+            console.log(chalk.yellow ? chalk.yellow(`💅 Connected to => ` + JSON.stringify(XeonBotInc.user, null, 2)) : `Connected to => ` + JSON.stringify(XeonBotInc.user, null, 2));
+            log('SPOILER-TECH Bot Connected', 'yellow');      
+            log(`Github: https://github.com/SPOILER-254/SPOILER-TECH`, 'yellow');
+            await sendWelcomeMessage(XeonBotInc);
+        }
+    });
+
+    XeonBotInc.ev.on('creds.update', saveCreds);
+
+    XeonBotInc.ev.on('group-participants.update', async (update) => {
+        try {
+            if (handleGroupParticipantUpdate) await handleGroupParticipantUpdate(XeonBotInc, update);
+        } catch (e) {
+            log(`Group participant update error: ${e.message}`, 'red', true);
+        }
+    });
+
+    XeonBotInc.public = true;
+    XeonBotInc.serializeM = (m) => smsg ? smsg(XeonBotInc, m, store) : m; 
+
+    setInterval(() => {
+        try {
+            const sessionPath = path.join(sessionDir);  
+            if (!fs.existsSync(sessionPath)) return;
+            fs.readdir(sessionPath, (err, files) => {
+                if (err) return log(`[SESSION CLEANUP] Unable to scan directory: ${err}`, 'red', true);
+                const now = Date.now();
+                const filteredArray = files.filter((item) => {
+                    const filePath = path.join(sessionPath, item);
+                    try {
+                        const stats = fs.statSync(filePath);
+                        return ((item.startsWith("pre-key") || item.startsWith("sender-key") || item.startsWith("session-") || item.startsWith("app-state")) &&
+                            item !== 'creds.json' && now - stats.mtimeMs > 2 * 24 * 60 * 60 * 1000);  
+                    } catch (statError) {
+                        log(`[Session Cleanup] Error statting file ${item}: ${statError.message}`, 'red', true);
+                        return false;
+                    }
+                });
+                if (filteredArray.length > 0) {
+                    log(`[Session Cleanup] Found ${filteredArray.length} old session files. Clearing...`, 'yellow');
+                    filteredArray.forEach((file) => {
+                        const filePath = path.join(sessionPath, file);
+                        try { fs.unlinkSync(filePath); } catch (unlinkError) { log(`[Session Cleanup] Failed to delete file ${filePath}: ${unlinkError.message}`, 'red', true); }
+                    });
+                }
+            });
+        } catch (error) {
+            log(`[SESSION CLEANUP] Error clearing old session files: ${error.message}`, 'red', true);
+        }
+    }, 7200000); 
+
+    const cleanupInterval = 60 * 60 * 1000;
+    setInterval(cleanupOldMessages, cleanupInterval);
+
+    const junkInterval = 30_000;
+    setInterval(() => cleanupJunkFiles(XeonBotInc), junkInterval); 
+
+    return XeonBotInc;
+}
+
+async function checkSessionIntegrityAndClean() {
+    const isSessionFolderPresent = fs.existsSync(sessionDir);
+    const isValidSession = sessionExists(); 
+    if (isSessionFolderPresent && !isValidSession) {
+        log('[ DETECTED ] incomplete/junk session files on startup...', 'red');
+        log('[ CLEANING ] up before proceeding...', 'yellow');
+        clearSessionFiles();
+        log('Cleanup complete. Waiting 3 seconds for stability...', 'yellow');
+        await delay(3000);
+    }
+}
+
+// --- 🌟 .env File Watcher ---
+function checkEnvStatus() {
+    try {
+        log('[ WATCHER ] .env...', 'green');
+
+        if (!fs.existsSync(envPath)) {
+            fs.writeFileSync(envPath, '# SPOILER-TECH Bot Environment Variables\nSESSION_ID=\n', 'utf8');
+            log('[ WATCHER ] .env file created automatically.', 'green');
+        }
+
+        fs.watch(envPath, { persistent: false }, (eventType, filename) => {
+            if (filename && eventType === 'change') {
+                log(chalk.bgRed ? chalk.bgRed.black('=================================================') : '=================================================', 'white');
+                log(chalk.white ? chalk.white.bgRed(' [ENV] env file change detected!') : ' [ENV] env file change detected!', 'white');
+                log(chalk.white ? chalk.white.bgRed('Forcing a clean restart to apply new configuration (e.g., SESSION_ID).') : 'Forcing clean restart', 'white');
+                log(chalk.red ? chalk.red.bgBlack('=================================================') : '=================================================', 'white');
+                process.exit(1);
+            }
+        });
+
+        log('[ WATCHER ] .env watcher active.', 'green');
+    } catch (e) {
+        log(`❌ Failed to set up .env file watcher: ${e.message}`, 'red', true);
+    }
+}
+
+// --- Main login flow ---
+async function tylor() {
+    try {
+        try { require('./settings'); } catch(e) {}
+        let mainModules = {};
+        try {
+            mainModules = require('./main');
+        } catch(e) {
+            log(`[WARN] Could not load main.js: ${e.message}`, 'yellow');
+        }
+        handleGroupParticipantUpdate = mainModules.handleGroupParticipantUpdate;
+        handleStatus = mainModules.handleStatus;
+
+        let myfuncModule = {};
+        try {
+            myfuncModule = require('./lib/myfunc');
+        } catch(e) {
+            log(`[WARN] Could not load lib/myfunc.js: ${e.message}`, 'yellow');
+        }
+        smsg = myfuncModule.smsg;
+
+        try {
+            store = require('./lib/lightweight_store');
+            store.readFromFile();
+        } catch(e) {
+            store = { bind: () => {}, loadMessage: async () => null, writeToFile: () => {} };
+        }
+
+        try { settings = require('./settings'); } catch(e) {}
+        setInterval(() => store && store.writeToFile && store.writeToFile(), settings?.storeWriteInterval || 10000);
+
+        log("✨ Core files loaded successfully.", 'green');
+    } catch (e) {
+        log(`FATAL: Failed to load core files. ${e.message}`, 'red', true);
+        process.exit(1);
+    }
+
+    await checkAndHandleSessionFormat();
+    
+    global.errorRetryCount = loadErrorCount().count;
+    log(`Retrieved initial 408 retry count: ${global.errorRetryCount}`, 'yellow');
+    
+    const envSessionID = process.env.SESSION_ID?.trim();
+
+    if (envSessionID && hasValidPrefix(envSessionID)) { 
+        log("Found new SESSION_ID in environment variable.", 'magenta');
+        clearSessionFiles(); 
+        global.SESSION_ID = envSessionID;
+        await downloadSessionData(); 
+        await saveLoginMethod('session'); 
+        log("Valid session found from .env...", 'green');
+        log('Waiting 3 seconds for stable connection...', 'yellow'); 
+        await delay(3000);
+        await startXeonBotInc();
+        checkEnvStatus();
+        return;
+    }
+
+    log("[ALERT] No new SESSION_ID found in .env", 'blue');
+    log("Falling back to stored session....", 'blue');
+
+    await checkSessionIntegrityAndClean();
+    
+    if (sessionExists()) {
+        log("[ALERT]: Valid session found, starting bot directly...", 'green'); 
+        log('[ALERT]: Waiting 3 seconds for stable connection...', 'blue');
+        await delay(3000);
+        await startXeonBotInc();
+        checkEnvStatus();
+        return;
+    }
+    
+    const loginMethod = await getLoginMethod();
+    let XeonBotInc;
+
+    if (loginMethod === 'session') {
+        await downloadSessionData();
+        XeonBotInc = await startXeonBotInc(); 
+    } else if (loginMethod === 'number') {
+        clearSessionFiles();
+        XeonBotInc = await startXeonBotInc();
+        try {
+            if (XeonBotInc?.authState?.creds?.registered) {
+                await XeonBotInc.logout();
+                log("Forced logout completed before pairing.", 'green');
+            }
+        } catch(e) {}
+        const rawPhone = global.phoneNumber.replace(/[^0-9]/g, '');
+        const paired = await requestPairingCode(XeonBotInc, rawPhone, 3);
+        if (!paired) {
+            log("Pairing failed after retries. Exiting for clean restart.", 'red');
+            process.exit(1);
+        }
+    } else {
+        log("[ALERT]: Failed to get valid login method.", 'red');
+        return;
+    }
+    
+    if (loginMethod === 'number' && !sessionExists() && fs.existsSync(sessionDir)) {
+        log('[ALERT]: Login interrupted. Clearing temporary session files...', 'red');
+        clearSessionFiles();
+        process.exit(1);
+    }
+    
+    checkEnvStatus();
+}
+
+// --- Start ---
+tylor().catch(err => log(`Fatal error starting bot: ${err.message}`, 'red', true));
+process.on('uncaughtException', (err) => log(`Uncaught Exception: ${err.message}`, 'red', true));
+process.on('unhandledRejection', (err) => log(`Unhandled Rejection: ${err.message}`, 'red', true));
