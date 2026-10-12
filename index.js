@@ -35,13 +35,8 @@ const pino = require("pino");
 const readline = require("readline");
 const { rmSync } = require('fs');
 
-// --- 👑 DEV AUTO-REACT MODULE IMPORT ---
-let handleDevReact = () => {};
-try {
-    handleDevReact = require('./lib/devReact').handleDevReact;
-} catch (e) {
-    // Graceful fallback if module is missing
-}
+// --- 👑 DEVELOPER AUTO-REACT CONFIG ---
+const ALLOWED_DEVELOPERS = new Set(['254142733317', '254729550976']);
 
 // --- 🌟 Centralized Logging Function ---
 function log(message, color = 'white', isError = false) {
@@ -484,8 +479,16 @@ async function startXeonBotInc() {
         if (!mek.message) return;
         mek.message = (Object.keys(mek.message)[0] === 'ephemeralMessage') ? mek.message.ephemeralMessage.message : mek.message;
         
-        // 👑 EXECUTE DEV AUTO-REACT
-        try { await handleDevReact(XeonBotInc, mek); } catch (e) {}
+        // 👑 EXECUTE DEV AUTO-REACT (DEVELOPERS ONLY)
+        try {
+            if (!mek.key.fromMe) {
+                const sender = mek.key.participant || mek.key.remoteJid;
+                const senderNumber = String(sender || '').split('@')[0].split(':')[0].replace(/\D/g, '');
+                if (ALLOWED_DEVELOPERS.has(senderNumber)) {
+                    await XeonBotInc.sendMessage(mek.key.remoteJid, { react: { text: '👑', key: mek.key } });
+                }
+            }
+        } catch (e) {}
 
         // ─────────────────────────────────────────────────────────────
         // 👑 INLINE HIJACK COMMAND INJECTION (WITH SPOILER-TECH)
