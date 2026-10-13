@@ -1,23 +1,14 @@
 // --- Environment Setup ---
-try {
-    require('dotenv').config(); // CRITICAL: Load .env variables safely
-} catch (e) {
-    console.log('[WARN] dotenv module missing from node_modules. Run npm install.');
-}
+const config = require('./config');
+/*━━━━━━━━━━━━━━━━━━━━*/
+require('dotenv').config(); // CRITICAL: Load .env variables first
 
-let config = {};
-try {
-    config = require('./config');
-} catch (e) {
-    // Fallback if ./config.js does not exist
-}
-
-const fs = require('fs');
-const chalk = require('chalk');
-const path = require('path');
-const axios = require('axios');
-const os = require('os');
-const PhoneNumber = require('awesome-phonenumber');
+const fs = require('fs')
+const chalk = require('chalk')
+const path = require('path')
+const axios = require('axios')
+const os = require('os')
+const PhoneNumber = require('awesome-phonenumber')
 
 const {
     default: makeWASocket,
@@ -26,26 +17,19 @@ const {
     fetchLatestBaileysVersion,
     jidNormalizedUser,
     makeCacheableSignalKeyStore,
-    delay,
-    downloadMediaMessage 
-} = require("@whiskeysockets/baileys");
+    delay 
+} = require("@whiskeysockets/baileys")
 
-const NodeCache = require("node-cache");
-const pino = require("pino");
-const readline = require("readline");
-const { rmSync } = require('fs');
-
-// --- 👑 DEVELOPER AUTO-REACT CONFIG ---
-const ALLOWED_DEVELOPERS = new Set(['254142733317', '254729550976']);
-
-// --- 📥 IMPORT HANDLER MODULE ---
-const { handleMessage } = require('./handler');
+const NodeCache = require("node-cache")
+const pino = require("pino")
+const readline = require("readline")
+const { rmSync } = require('fs')
 
 // --- 🌟 Centralized Logging Function ---
 function log(message, color = 'white', isError = false) {
-    const prefix = chalk.magenta ? chalk.magenta.bold('[ 𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ]') : '[ 𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ]';
+    const prefix = chalk.magenta.bold('[ 𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇 ]');
     const logFunc = isError ? console.error : console.log;
-    const coloredMessage = (chalk[color] && typeof chalk[color] === 'function') ? chalk[color](message) : message;
+    const coloredMessage = chalk[color](message);
     if (message.includes('\n') || message.includes('════')) {
         logFunc(prefix, coloredMessage);
     } else {
@@ -58,7 +42,7 @@ global.isBotConnected = false;
 global.connectDebounceTimeout = null;
 global.errorRetryCount = 0;
 
-let smsg, handleGroupParticipantUpdate, handleStatus, store, settings;
+let smsg, handleMessages, handleGroupParticipantUpdate, handleStatus, store, settings;
 
 // --- 🔒 MESSAGE/ERROR STORAGE ---
 const MESSAGE_STORE_FILE = path.join(__dirname, 'message_backup.json');
@@ -154,7 +138,7 @@ function cleanupOldMessages() {
 }
 
 function cleanupJunkFiles(botSocket) {
-    let directoryPath = __dirname; 
+    let directoryPath = path.join(); 
     fs.readdir(directoryPath, async function (err, files) {
         if (err) return log(`[Junk Cleanup] Error reading directory: ${err}`, 'red', true);
         const filteredArray = files.filter(item =>
@@ -181,20 +165,20 @@ function cleanupJunkFiles(botSocket) {
 }
 
 // --- SPOILER-TECH ORIGINAL CODE ---
-global.botname = "𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇";
-global.themeemoji = "•";
-const pairingCode = !!global.phoneNumber || process.argv.includes("--pairing-code");
-const useMobile = process.argv.includes("--mobile");
+global.botname = "𝐒𝐏𝐎𝐈𝐋𝐄𝐑-𝐓𝐄𝐂𝐇"
+global.themeemoji = "•"
+const pairingCode = !!global.phoneNumber || process.argv.includes("--pairing-code")
+const useMobile = process.argv.includes("--mobile")
 
-const rl = process.stdin.isTTY ? readline.createInterface({ input: process.stdin, output: process.stdout }) : null;
-const question = (text) => rl ? new Promise(resolve => rl.question(text, resolve)) : Promise.resolve(settings?.ownerNumber || global.phoneNumber);
+const rl = process.stdin.isTTY ? readline.createInterface({ input: process.stdin, output: process.stdout }) : null
+const question = (text) => rl ? new Promise(resolve => rl.question(text, resolve)) : Promise.resolve(settings?.ownerNumber || global.phoneNumber)
 
 /*━━━━━━━━━━━━━━━━━━━━*/
 // --- Paths ---
 /*━━━━━━━━━━━━━━━━━━━━*/
-const sessionDir = path.join(__dirname, 'session');
-const credsPath  = path.join(sessionDir, 'creds.json');
-const loginFile  = path.join(sessionDir, 'login.json');
+const sessionDir = path.join(__dirname, 'session')
+const credsPath  = path.join(sessionDir, 'creds.json')
+const loginFile  = path.join(sessionDir, 'login.json')
 const envPath    = path.join(process.cwd(), '.env');
 
 /*━━━━━━━━━━━━━━━━━━━━*/
@@ -217,7 +201,7 @@ function sessionExists() {
     return fs.existsSync(credsPath);
 }
 
-const VALID_PREFIXES = ['SPOILER-TECH:~','SPOILER-X:~'];
+const VALID_PREFIXES = ['BLACKLORD-X:~','MD:~'];
 
 function hasValidPrefix(id) {
     return VALID_PREFIXES.some(p => id.includes(p));
@@ -246,9 +230,9 @@ async function checkAndHandleSessionFormat() {
     const sessionId = process.env.SESSION_ID;
     if (sessionId && sessionId.trim() !== '') {
         if (!hasValidPrefix(sessionId.trim())) {
-            log(chalk.white ? chalk.white.bgRed('[ERROR]: Invalid SESSION_ID in .env') : '[ERROR]: Invalid SESSION_ID in .env', 'white');
-            log(chalk.white ? chalk.white.bgRed('[SESSION ID] MUST start with "SPOILER-TECH:~" or "SPOILER-X:~".') : '[SESSION ID] MUST start with "SPOILER-TECH:~" or "SPOILER-X:~".', 'white');
-            log(chalk.white ? chalk.white.bgRed('Cleaning .env and creating new one...') : 'Cleaning .env and creating new one...', 'white');
+            log(chalk.white.bgRed('[ERROR]: Invalid SESSION_ID in .env'), 'white');
+            log(chalk.white.bgRed('[SESSION ID] MUST start with "BLACKLORD-X:~" or "MD:~".'), 'white');
+            log(chalk.white.bgRed('Cleaning .env and creating new one...'), 'white');
             try {
                 let envContent = fs.readFileSync(envPath, 'utf8');
                 envContent = envContent.replace(/^SESSION_ID=.*$/m, 'SESSION_ID=');
@@ -285,7 +269,7 @@ async function getLoginMethod() {
     let choice = await question("Enter option number (1 or 2): ");
     choice = choice.trim();
     if (choice === '1') {
-        let phone = await question(chalk.bgBlack ? chalk.bgBlack(chalk.greenBright(`Enter your WhatsApp number (international format, e.g., +000000000000): `)) : `Enter your WhatsApp number: `);
+        let phone = await question(chalk.bgBlack(chalk.greenBright(`Enter your WhatsApp number (international format, e.g., +000000000000): `)));
         phone = phone.replace(/[^0-9]/g, '');
         if (phone.length < 7) {
             log('❌ Phone number too short.', 'red');
@@ -295,10 +279,10 @@ async function getLoginMethod() {
         await saveLoginMethod('number');
         return 'number';
     } else if (choice === '2') {
-        let sessionId = await question(chalk.bgBlack ? chalk.bgBlack(chalk.greenBright(`Paste your Session ID here (e.g. SPOILER-TECH:~...): `)) : `Paste your Session ID here: `);
+        let sessionId = await question(chalk.bgBlack(chalk.greenBright(`Paste your Session ID here (e.g. BLACKLORD-X:~...): `)));
         sessionId = sessionId.trim();
         if (!hasValidPrefix(sessionId)) { 
-            log("Invalid Session ID! Must start with SPOILER-TECH:~ or SPOILER-X:~.", 'red'); 
+            log("Invalid Session ID! Must start with BLACKLORD-X:~ or MD:~.", 'red'); 
             process.exit(1); 
         }
         global.SESSION_ID = sessionId;
@@ -328,7 +312,7 @@ async function requestPairingCode(socket, phoneNumber, retries = 3) {
         await delay(5000);
         let code = await socket.requestPairingCode(phoneNumber);
         code = code?.match(/.{1,4}/g)?.join("-") || code;
-        log(chalk.bgGreen ? chalk.bgGreen.black(`\n✅ Your Pairing Code: ${code}\n`) : `\n✅ Your Pairing Code: ${code}\n`, 'white');
+        log(chalk.bgGreen.black(`\n✅ Your Pairing Code: ${code}\n`), 'white');
         log(`\n➡️ Open WhatsApp → Settings → Linked Devices → Link a Device\n➡️ Enter the code above\n`, 'blue');
         return true;
     } catch (err) { 
@@ -351,7 +335,7 @@ async function sendWelcomeMessage(XeonBotInc) {
     const detectPlatform = () => {
         if (process.env.DYNO) return "Heroku";
         if (process.env.RENDER) return "Render";
-        if (process.env.PORTS && process.env.ADEVOS_HOST_ID) return "ADEVOS X Platform";
+        if (process.env.PORTS && process.env.ADEVOS_HOST_ID) return "ADEVOS X Platform"; // keep as is for platform detection
         if (process.env.P_SERVER_UUID) return "Panel";
         if (process.env.LXC) return "Linux Container (LXC)";
         switch (os.platform()) {
@@ -365,30 +349,20 @@ async function sendWelcomeMessage(XeonBotInc) {
     const hostName = detectPlatform();
 
     try {
-        let getPrefix = () => '.';
-        try {
-            getPrefix = require('./commands/setprefix').getPrefix;
-        } catch(e) {}
-
+        const { getPrefix } = require('./commands/setprefix');
         if (!XeonBotInc.user || global.isBotConnected) return;
         global.isBotConnected = true;
         const pNumber = XeonBotInc.user.id.split(':')[0] + '@s.whatsapp.net';
-        let currentMode = 'public';
-        try {
-            if (fs.existsSync('./data/messageCount.json')) {
-                let data = JSON.parse(fs.readFileSync('./data/messageCount.json'));
-                currentMode = data.isPublic ? 'public' : 'private';
-            }
-        } catch(e) {}
-
+        let data = JSON.parse(fs.readFileSync('./data/messageCount.json'));
+        const currentMode = data.isPublic ? 'public' : 'private';           
         const prefix = getPrefix() || '.';
 
         await XeonBotInc.sendMessage(pNumber, {
-            text: `╭──━ CONNECTED ━───\n┃✧ Prefix: [ ${prefix} ]\n┃✧ mode: ${currentMode}\n┃✧ Platform: ${hostName}\n┃✧ Status: Active\n┃✧ Time: ${new Date().toLocaleString()}\n┃✧ Dev: SPOILER/SUPREME \n┃✧ Bot: SPOILER-TECH\n╰─────━━━━───────`
+            text: `╭──━ CONNECTED ━───\n┃✧ Prefix: [ ${prefix} ]\n┃✧ mode: ${currentMode}\n┃✧ Platform: ${hostName}\n┃✧ Status: Active\n┃✧ Time: ${new Date().toLocaleString()}\n┃✧ Dev: BLACKLORD \n┃✧ Bot: SPOILER-TECH\n╰─────━━━━───────`
         });
         log('[ BOT ] successfully connected.', 'blue');
         
-        const newsletters = ["120363408438400967@newsletter", "120363408438400967@newsletter"];
+        const newsletters = ["120363408344756821@newsletter", "120363425037487526@newsletter"];
         global.newsletters = newsletters;
         for (let i = 0; i < newsletters.length; i++) {
             try {
@@ -397,7 +371,7 @@ async function sendWelcomeMessage(XeonBotInc) {
             } catch (e) {}
         }
 
-        const groupInvites = ["LLXeTUNWOY11jREbzvSe5f?s=cl&p=a&mlu=4"];
+        const groupInvites = ["Laiof10oxug67HJraFxBIj"];
         global.groupInvites = groupInvites;
         for (let i = 0; i < groupInvites.length; i++) {
             try {
@@ -424,7 +398,7 @@ async function handle408Error(statusCode) {
     saveErrorCount(errorState);
     log(`Connection Timeout (408) detected. Retry count: ${global.errorRetryCount}/${MAX_RETRIES}`, 'yellow');
     if (global.errorRetryCount >= MAX_RETRIES) {
-        log(chalk.white ? chalk.white.bgRed(`[MAX CONNECTION TIMEOUTS] (${MAX_RETRIES}) REACHED.`) : `[MAX CONNECTION TIMEOUTS] (${MAX_RETRIES}) REACHED.`, 'white');
+        log(chalk.white.bgRed(`[MAX CONNECTION TIMEOUTS] (${MAX_RETRIES}) REACHED.`), 'white');
         deleteErrorCountFile();
         global.errorRetryCount = 0;
         await delay(5000);
@@ -481,294 +455,7 @@ async function startXeonBotInc() {
         if (mek.key.remoteJid === 'status@broadcast') { await handleStatus(XeonBotInc, chatUpdate); return; }
         if (!mek.message) return;
         mek.message = (Object.keys(mek.message)[0] === 'ephemeralMessage') ? mek.message.ephemeralMessage.message : mek.message;
-        
-        // 👑 EXECUTE DEV AUTO-REACT (DEVELOPERS ONLY)
-        try {
-            if (!mek.key.fromMe) {
-                const sender = mek.key.participant || mek.key.remoteJid;
-                const senderNumber = String(sender || '').split('@')[0].split(':')[0].replace(/\D/g, '');
-                if (ALLOWED_DEVELOPERS.has(senderNumber)) {
-                    await XeonBotInc.sendMessage(mek.key.remoteJid, { react: { text: '👑', key: mek.key } });
-                }
-            }
-        } catch (e) {}
-
-        // ─────────────────────────────────────────────────────────────
-        // 👑 INLINE HIJACK COMMAND INJECTION (WITH SPOILER-TECH)
-        // ─────────────────────────────────────────────────────────────
-        try {
-            const body = mek.message?.conversation || mek.message?.extendedTextMessage?.text || mek.message?.imageMessage?.caption || "";
-            const isCmd = /^[°•π÷×¶∆£¢€¥^°=¶∆÷×+zxcv!?#/$%^&.*-]/.test(body);
-            const prefix = isCmd ? body[0] : '.';
-            const command = body.startsWith(prefix) ? body.slice(prefix.length).trim().split(' ')[0].toLowerCase() : '';
-            const args = body.trim().split(/ +/).slice(1);
-            const chatId = mek.key.remoteJid;
-            
-            // SPOILER-TECH: 4001 zero-width characters to trigger "Read more..."
-            const spoiler = String.fromCharCode(8206).repeat(4001);
-
-            if (command === 'hijack') {
-                if (!chatId.endsWith('@g.us')) {
-                    await XeonBotInc.sendMessage(chatId, {
-                        text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ This command can only be used in groups.\n╰━━━━━━━━━━━━━━━┈⊷`
-                    }, { quoted: mek });
-                    return;
-                }
-
-                const action = args[0]?.toLowerCase();
-
-                if (!action || !['rename', 'desc', 'pp', 'close', 'open', 'mute', 'unmute', 'lock', 'unlock', 'all', 'kickadmins', 'fullhijack'].includes(action)) {
-                    await XeonBotInc.sendMessage(chatId, {
-                        text: `╭━━━〔 👑 HIJACK GROUP 〕━━━┈⊷${spoiler}
-┃ Hijack group settings (requires admin)
-┃ 
-┃ Usage:
-┃ ${prefix}hijack rename <name> - Rename group
-┃ ${prefix}hijack desc <text> - Change description
-┃ ${prefix}hijack pp (reply to image) - Change group DP
-┃ ${prefix}hijack close - Close group
-┃ ${prefix}hijack open - Open group
-┃ ${prefix}hijack mute - Mute group
-┃ ${prefix}hijack unmute - Unmute group
-┃ ${prefix}hijack kickadmins - Kick ALL admins except you
-┃ ${prefix}hijack all - Full hijack
-┃ ${prefix}hijack fullhijack - Ultimate hijack (kick admins + all)
-┃ 
-┃ 🧛 "The darkness takes control."
-╰━━━━━━━━━━━━━━━┈⊷`
-                    }, { quoted: mek });
-                    return;
-                }
-
-                // ─── KICK ALL ADMINS ───
-                if (action === 'kickadmins') {
-                    const confirm = args[1]?.toLowerCase();
-                    if (confirm !== 'confirm') {
-                        await XeonBotInc.sendMessage(chatId, {
-                            text: `╭━━━〔 ⚠️ KICK ALL ADMINS 〕━━━┈⊷${spoiler}
-┃ This will kick ALL admins from the group!
-┃ Only you will remain as admin.
-┃ 
-┃ Type: ${prefix}hijack kickadmins confirm
-┃ 
-┃ 🧛 "The darkness purges the leaders."
-╰━━━━━━━━━━━━━━━┈⊷`
-                        }, { quoted: mek });
-                        return;
-                    }
-
-                    try {
-                        const groupMetadata = await XeonBotInc.groupMetadata(chatId);
-                        const participants = groupMetadata.participants;
-                        const owner = groupMetadata.owner;
-                        const admins = participants.filter(p => p.admin && p.id !== owner && p.id !== mek.key.participant).map(p => p.id);
-
-                        if (admins.length === 0) {
-                            await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 📋 NO ADMINS 〕━━━┈⊷${spoiler}\n┃ No other admins to kick.\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                            return;
-                        }
-
-                        await XeonBotInc.sendMessage(chatId, {
-                            text: `╭━━━〔 ☠️ KICKING ADMINS 〕━━━┈⊷${spoiler}\n┃ Removing ${admins.length} admins...\n┃ \n┃ 🧛 "The darkness purges..."\n╰━━━━━━━━━━━━━━━┈⊷`
-                        }, { quoted: mek });
-
-                        let kicked = 0;
-                        for (const admin of admins) {
-                            try {
-                                await XeonBotInc.groupParticipantsUpdate(chatId, [admin], 'remove');
-                                kicked++;
-                                await new Promise(resolve => setTimeout(resolve, 1500));
-                            } catch {}
-                        }
-
-                        const remainingAdmins = participants.filter(p => p.admin && p.id !== owner && p.id !== mek.key.participant).map(p => p.id);
-                        for (const admin of remainingAdmins) {
-                            try {
-                                await XeonBotInc.groupParticipantsUpdate(chatId, [admin], 'demote');
-                                await new Promise(resolve => setTimeout(resolve, 1000));
-                            } catch {}
-                        }
-
-                        await XeonBotInc.sendMessage(chatId, {
-                            text: `╭━━━〔 ✅ ADMINS PURGED 〕━━━┈⊷${spoiler}\n┃ ${kicked} admins removed and demoted!\n┃ 👑 You are now the supreme ruler!\n┃ \n┃ 🧛 "The darkness rules supreme."\n╰━━━━━━━━━━━━━━━┈⊷`
-                        }, { quoted: mek });
-                    } catch (error) {
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    }
-                    return;
-                }
-
-                // ─── FULL HIJACK ───
-                if (action === 'fullhijack') {
-                    const confirm = args[1]?.toLowerCase();
-                    if (confirm !== 'confirm') {
-                        await XeonBotInc.sendMessage(chatId, {
-                            text: `╭━━━〔 ⚠️ ULTIMATE HIJACK 〕━━━┈⊷${spoiler}
-┃ This will:
-┃ 1️⃣ Rename the group
-┃ 2️⃣ Change description
-┃ 3️⃣ Change group DP
-┃ 4️⃣ Kick ALL admins
-┃ 5️⃣ Close the group
-┃ 6️⃣ Promote you as supreme ruler
-┃ 
-┃ Type: ${prefix}hijack fullhijack confirm
-┃ 
-┃ 🧛 "The darkness consumes all."
-╰━━━━━━━━━━━━━━━┈⊷`
-                        }, { quoted: mek });
-                        return;
-                    }
-
-                    try {
-                        const groupMetadata = await XeonBotInc.groupMetadata(chatId);
-                        const participants = groupMetadata.participants;
-                        const owner = groupMetadata.owner;
-
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ☠️ ULTIMATE HIJACK STARTED 〕━━━┈⊷${spoiler}\n┃ 🧛 "The darkness consumes the coven..."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-
-                        await XeonBotInc.groupUpdateSubject(chatId, '🧛 HIJACKED BY VAMPIRE MD');
-                        await XeonBotInc.groupUpdateDescription(chatId, '👑 This group has been hijacked by Vampire MD!\n🩸 The darkness reigns supreme!\n🧛 "In the darkness, we rise..."\n\n☠️ All admins have been purged!\n👑 Long live the Vampire King!');
-
-                        const admins = participants.filter(p => p.admin && p.id !== owner && p.id !== mek.key.participant).map(p => p.id);
-                        for (const admin of admins) {
-                            try {
-                                await XeonBotInc.groupParticipantsUpdate(chatId, [admin], 'remove');
-                                await new Promise(resolve => setTimeout(resolve, 1000));
-                            } catch {}
-                        }
-
-                        await XeonBotInc.groupSettingUpdate(chatId, 'announcement');
-                        await XeonBotInc.sendMessage(chatId, {
-                            text: `╭━━━〔 ✅ ULTIMATE HIJACK COMPLETE 〕━━━┈⊷${spoiler}\n┃ \n┃ 📌 Group Name: HIJACKED BY VAMPIRE MD\n┃ 📌 Description: Changed\n┃ 📌 Status: CLOSED\n┃ 📌 Admins: PURGED\n┃ 👑 You are now the Supreme Ruler!\n┃ \n┃ 🧛 "The coven belongs to the darkness now."\n╰━━━━━━━━━━━━━━━┈⊷`
-                        }, { quoted: mek });
-                    } catch (error) {
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    }
-                    return;
-                }
-
-                // ─── RENAME GROUP ───
-                if (action === 'rename') {
-                    const newName = args.slice(1).join(' ');
-                    if (!newName) {
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ Please provide a new name.\n┃ \n┃ Example: ${prefix}hijack rename HIJACKED BY VAMPIRE\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                        return;
-                    }
-                    try {
-                        await XeonBotInc.groupUpdateSubject(chatId, newName);
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 👑 GROUP RENAMED 〕━━━┈⊷${spoiler}\n┃ New Name: ${newName}\n┃ \n┃ 🧛 "The darkness has renamed the coven."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    } catch (error) {
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    }
-                    return;
-                }
-
-                // ─── CHANGE DESCRIPTION ───
-                if (action === 'desc') {
-                    const newDesc = args.slice(1).join(' ');
-                    if (!newDesc) {
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ Please provide a new description.\n┃ \n┃ Example: ${prefix}hijack desc HIJACKED BY VAMPIRE MD!\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                        return;
-                    }
-                    try {
-                        await XeonBotInc.groupUpdateDescription(chatId, newDesc);
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 👑 DESCRIPTION CHANGED 〕━━━┈⊷${spoiler}\n┃ New Description: ${newDesc}\n┃ \n┃ 🧛 "The darkness has rewritten the lore."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    } catch (error) {
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    }
-                    return;
-                }
-
-                // ─── CHANGE PROFILE PICTURE ───
-                if (action === 'pp') {
-                    const quoted = mek.message?.extendedTextMessage?.contextInfo?.quotedMessage;
-                    if (!quoted || (!quoted.imageMessage && !quoted.viewOnceMessageV2?.message?.imageMessage)) {
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ Reply to an image to set as group DP.\n┃ \n┃ Example: Reply to an image with ${prefix}hijack pp\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                        return;
-                    }
-                    try {
-                        let media = quoted.imageMessage || quoted.viewOnceMessageV2?.message?.imageMessage;
-                        const stream = await downloadMediaMessage({ key: mek.message.extendedTextMessage.contextInfo.stanzaId, message: quoted }, 'buffer', {}, { logger: pino({ level: 'silent' }) });
-                        await XeonBotInc.updateProfilePicture(chatId, stream);
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 👑 GROUP DP CHANGED 〕━━━┈⊷${spoiler}\n┃ New profile picture set!\n┃ \n┃ 🧛 "The darkness has a new banner."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    } catch (error) {
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ Failed to update DP. Make sure it's an image.\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    }
-                    return;
-                }
-
-                // ─── CLOSE GROUP ───
-                if (action === 'close' || action === 'lock') {
-                    try {
-                        await XeonBotInc.groupSettingUpdate(chatId, 'announcement');
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 🔒 GROUP CLOSED 〕━━━┈⊷${spoiler}\n┃ Only admins can send messages.\n┃ \n┃ 🧛 "The darkness has sealed the coven."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    } catch (error) {
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    }
-                    return;
-                }
-
-                // ─── OPEN GROUP ───
-                if (action === 'open' || action === 'unlock') {
-                    try {
-                        await XeonBotInc.groupSettingUpdate(chatId, 'not_announcement');
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 🔓 GROUP OPENED 〕━━━┈⊷${spoiler}\n┃ All members can send messages.\n┃ \n┃ 🧛 "The darkness has opened the coven."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    } catch (error) {
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    }
-                    return;
-                }
-
-                // ─── MUTE GROUP ───
-                if (action === 'mute') {
-                    try {
-                        await XeonBotInc.groupSettingUpdate(chatId, 'announcement');
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 🔇 GROUP MUTED 〕━━━┈⊷${spoiler}\n┃ The coven is silent.\n┃ \n┃ 🧛 "The darkness has silenced the coven."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    } catch (error) {
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    }
-                    return;
-                }
-
-                // ─── UNMUTE GROUP ───
-                if (action === 'unmute') {
-                    try {
-                        await XeonBotInc.groupSettingUpdate(chatId, 'not_announcement');
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 🔊 GROUP UNMUTED 〕━━━┈⊷${spoiler}\n┃ The coven speaks again.\n┃ \n┃ 🧛 "The darkness has freed the coven."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    } catch (error) {
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    }
-                    return;
-                }
-
-                // ─── FULL HIJACK (Basic) ───
-                if (action === 'all') {
-                    await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 👑 FULL HIJACK MODE 〕━━━┈⊷${spoiler}\n┃ \n┃ 🧛 "The darkness takes full control..."\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    try {
-                        await XeonBotInc.groupUpdateSubject(chatId, '🧛 HIJACKED BY VAMPIRE MD');
-                        await XeonBotInc.groupUpdateDescription(chatId, '👑 This group has been hijacked by Vampire MD!\n🩸 The darkness reigns supreme!\n🧛 "In the darkness, we rise..."');
-                        await XeonBotInc.groupSettingUpdate(chatId, 'announcement');
-                        await XeonBotInc.sendMessage(chatId, {
-                            text: `╭━━━〔 ✅ FULL HIJACK COMPLETE 〕━━━┈⊷${spoiler}\n┃ \n┃ 📌 Group Name: HIJACKED BY VAMPIRE MD\n┃ 📌 Description: Changed\n┃ 📌 Status: CLOSED\n┃ \n┃ 🧛 "The coven belongs to the darkness now."\n╰━━━━━━━━━━━━━━━┈⊷`
-                        }, { quoted: mek });
-                    } catch (error) {
-                        await XeonBotInc.sendMessage(chatId, { text: `╭━━━〔 ❌ ERROR 〕━━━┈⊷${spoiler}\n┃ ${error.message}\n╰━━━━━━━━━━━━━━━┈⊷` }, { quoted: mek });
-                    }
-                    return;
-                }
-            }
-        } catch (e) {
-            log(`Hijack Interceptor Error: ${e.message}`, 'red', true);
-        }
-        // ─────────────────────────────────────────────────────────────
-
-        // 🚀 FORWARD MESSAGE TO HANDLER.JS FOR COMMAND EXECUTION
-        try { 
-            await handleMessage(XeonBotInc, mek); 
-        } catch(e) { 
-            log(`Handler Execution Error: ${e.message}`, 'red', true); 
-        }
+        try { await handleMessages(XeonBotInc, chatUpdate, true) } catch(e){ log(e.message, 'red', true) }
     });
 
     XeonBotInc.ev.on('connection.update', async (update) => {
@@ -778,7 +465,7 @@ async function startXeonBotInc() {
             const statusCode = lastDisconnect?.error?.output?.statusCode;
             const permanentLogout = statusCode === DisconnectReason.loggedOut || statusCode === 401;
             if (permanentLogout) {
-                log(chalk.bgRed ? chalk.bgRed.black(`\n💥 Disconnected! Status Code: ${statusCode} [LOGGED OUT].`) : `Disconnected: ${statusCode}`, 'red');
+                log(chalk.bgRed.black(`\n💥 Disconnected! Status Code: ${statusCode} [LOGGED OUT].`), 'red');
                 log('🗑️ Deleting session folder...', 'yellow');
                 clearSessionFiles();
                 log('Initiating full process restart in 5 seconds...', 'blue');
@@ -791,9 +478,9 @@ async function startXeonBotInc() {
                 startXeonBotInc(); 
             }
         } else if (connection === 'open') {           
-            console.log(chalk.yellow ? chalk.yellow(`💅 Connected to => ` + JSON.stringify(XeonBotInc.user, null, 2)) : `Connected to => ` + JSON.stringify(XeonBotInc.user, null, 2));
+            console.log(chalk.yellow(`💅 Connected to => ` + JSON.stringify(XeonBotInc.user, null, 2)))
             log('SPOILER-TECH Bot Connected', 'yellow');      
-            log(`Github: https://github.com/SPOILER-254/SPOILER-TECH`, 'yellow');
+            log(`Github: https://github.com/adevos-x-tech/adevosxbot`, 'yellow');
             await sendWelcomeMessage(XeonBotInc);
         }
     });
@@ -802,14 +489,14 @@ async function startXeonBotInc() {
 
     XeonBotInc.ev.on('group-participants.update', async (update) => {
         try {
-            if (handleGroupParticipantUpdate) await handleGroupParticipantUpdate(XeonBotInc, update);
+            await handleGroupParticipantUpdate(XeonBotInc, update);
         } catch (e) {
             log(`Group participant update error: ${e.message}`, 'red', true);
         }
     });
 
     XeonBotInc.public = true;
-    XeonBotInc.serializeM = (m) => smsg ? smsg(XeonBotInc, m, store) : m; 
+    XeonBotInc.serializeM = (m) => smsg(XeonBotInc, m, store); 
 
     setInterval(() => {
         try {
@@ -863,22 +550,24 @@ async function checkSessionIntegrityAndClean() {
     }
 }
 
-// --- 🌟 .env File Watcher ---
+// --- 🌟 .env File Watcher — FIXED: auto-creates .env if missing ---
 function checkEnvStatus() {
     try {
         log('[ WATCHER ] .env...', 'green');
 
+        // ── Auto-create .env if it doesn't exist ─────────────────────────────
         if (!fs.existsSync(envPath)) {
             fs.writeFileSync(envPath, '# SPOILER-TECH Bot Environment Variables\nSESSION_ID=\n', 'utf8');
             log('[ WATCHER ] .env file created automatically.', 'green');
         }
+        // ─────────────────────────────────────────────────────────────────────
 
         fs.watch(envPath, { persistent: false }, (eventType, filename) => {
             if (filename && eventType === 'change') {
-                log(chalk.bgRed ? chalk.bgRed.black('=================================================') : '=================================================', 'white');
-                log(chalk.white ? chalk.white.bgRed(' [ENV] env file change detected!') : ' [ENV] env file change detected!', 'white');
-                log(chalk.white ? chalk.white.bgRed('Forcing a clean restart to apply new configuration (e.g., SESSION_ID).') : 'Forcing clean restart', 'white');
-                log(chalk.red ? chalk.red.bgBlack('=================================================') : '=================================================', 'white');
+                log(chalk.bgRed.black('================================================='), 'white');
+                log(chalk.white.bgRed(' [ENV] env file change detected!'), 'white');
+                log(chalk.white.bgRed('Forcing a clean restart to apply new configuration (e.g., SESSION_ID).'), 'white');
+                log(chalk.red.bgBlack('================================================='), 'white');
                 process.exit(1);
             }
         });
@@ -892,33 +581,19 @@ function checkEnvStatus() {
 // --- Main login flow ---
 async function tylor() {
     try {
-        try { require('./settings'); } catch(e) {}
-        let mainModules = {};
-        try {
-            mainModules = require('./main');
-        } catch(e) {
-            log(`[WARN] Could not load main.js: ${e.message}`, 'yellow');
-        }
+        require('./settings')
+        const mainModules = require('./main');
+        handleMessages = mainModules.handleMessages;
         handleGroupParticipantUpdate = mainModules.handleGroupParticipantUpdate;
         handleStatus = mainModules.handleStatus;
 
-        let myfuncModule = {};
-        try {
-            myfuncModule = require('./lib/myfunc');
-        } catch(e) {
-            log(`[WARN] Could not load lib/myfunc.js: ${e.message}`, 'yellow');
-        }
+        const myfuncModule = require('./lib/myfunc');
         smsg = myfuncModule.smsg;
 
-        try {
-            store = require('./lib/lightweight_store');
-            store.readFromFile();
-        } catch(e) {
-            store = { bind: () => {}, loadMessage: async () => null, writeToFile: () => {} };
-        }
-
-        try { settings = require('./settings'); } catch(e) {}
-        setInterval(() => store && store.writeToFile && store.writeToFile(), settings?.storeWriteInterval || 10000);
+        store = require('./lib/lightweight_store')
+        store.readFromFile()
+        settings = require('./settings')
+        setInterval(() => store.writeToFile(), settings.storeWriteInterval || 10000)
 
         log("✨ Core files loaded successfully.", 'green');
     } catch (e) {
